@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/registration.css' %}">
+{% endblock extra_css %}
+{% block content %}
+<!-- Background shapes -->
+<div class="bg-shape shape-1"></div>
+<div class="bg-shape shape-2"></div>
+<div class="bg-shape shape-3"></div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="form-card p-4 p-md-5">
+                <!-- Coming soon badge -->
+                <div class="badge-coming-soon">COMING SOON 2025</div>
+
+                <div class="text-center mb-4">
+                    <div class="d-flex justify-content-center mb-3">
+                        <!-- Simple building icon based on logo -->
+                        <svg width="60" height="60" viewBox="0 0 200 200">
+                            <path
+                                d="M80 20 L80 180 L50 180 L50 100 L20 100 L20 180 L120 180 L120 100 L150 100 L150 180 L180 180 L180 20 Z"
+                                fill="none" stroke="#B8860B" stroke-width="8" />
+                        </svg>
+                    </div>
+                    <h3 class="logo-text mb-1">RentMatch<span class="ai-text">.AI</span></h3>
+                    <p class="text-muted small mb-3">APARTMENT</p>
+                    <h4 class="heading-line mb-4">Create Your Account</h4>
+                </div>
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mb-4">{{ message }}</div>
+                {% endfor %}
+                {% endif %}
+
+                <!-- This is where you replace everything with crispy -->
+                <!-- Registration Form -->
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="form-floating mb-4">
+                        {{ form.username }}
+                        <label for="{{ form.username.id_for_label }}"><i
+                                class="bi bi-person-fill me-2 text-muted"></i>Username</label>
+                        {% if form.username.errors %}
+                        <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        {{ form.email }}
+                        <label for="{{ form.email.id_for_label }}"><i
+                                class="bi bi-envelope-fill me-2 text-muted"></i>Email address</label>
+                        {% if form.email.errors %}
+                        <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        {{ form.password1 }}
+                        <label for="{{ form.password1.id_for_label }}"><i
+                                class="bi bi-lock-fill me-2 text-muted"></i>Password</label>
+                        {% if form.password1.errors %}
+                        <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        {{ form.password2 }}
+                        <label for="{{ form.password2.id_for_label }}"><i
+                                class="bi bi-shield-lock-fill me-2 text-muted"></i>Confirm password</label>
+                        {% if form.password2.errors %}
+                        <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check">
+                            {{ form.terms_agreement }}
+                            <label class="form-check-label" for="{{ form.terms_agreement.id_for_label }}">
+                                I agree to RentMatch's <a href="#" class="link-gold">Terms</a> and <a href="#"
+                                    class="link-gold">Privacy Policy</a>
+                            </label>
+                            {% if form.terms_agreement.errors %}
+                            <div class="text-danger small mt-1">{{ form.terms_agreement.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-4">
+                        <button type="submit" class="btn btn-gold btn-lg py-3">Create Account</button>
+                    </div>
+
+                    <div class="text-center">
+                        <p class="mb-0">Already have an account? <a href="{% url 'users:login' %}" class="link-gold">Log
+                                In</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
