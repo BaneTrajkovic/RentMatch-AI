@@ -80,6 +80,7 @@
             opacity: 0;
             transition: opacity 0.3s;
             white-space: nowrap;
+            text-decoration: none;
         }
         
         .sidebar:hover .sidebar-logo-text {
@@ -130,10 +131,10 @@
         }
         
         .content-header {
-            height: 80px;
-            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
             background-color: white;
-            padding: 0 2rem;
+            padding: 0 2rem 1rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -300,7 +301,7 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <i class="bi bi-house-heart-fill sidebar-icon"></i>
-            <span class="sidebar-logo-text">RentMatch.AI</span>
+            <a class="sidebar-logo-text" href="{% url 'users:welcome' %}">RentMatch.AI</a>
         </div>
         <div class="sidebar-menu mt-4">
             <a href="#" class="menu-item active">
