@@ -43,3 +43,4 @@ env/
 
 # Secrets - Important! 
 .env
+constants.py
