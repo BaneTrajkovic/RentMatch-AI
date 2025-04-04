@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Role</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'users/welcome.css' %}" rel="stylesheet">
+    <link href="{% static 'css/colors.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1 class="display-4">Welcome to <span style="color: var(--gold);">RentMatch.AI</span></h1>
+            <p class="lead">Select how you want to interact with our platform</p>
+        </div>
+
+        <div class="role-selector">
+            <div class="role-section investor-section">
+                <i class="role-icon bi bi-graph-up"></i>
+                <h2>Investor</h2>
+                <p>Find investment opportunities and grow your real estate portfolio</p>
+                <ul class="feature-list">
+                    <li>Property investment analysis</li>
+                    <li>ROI calculators and projections</li>
+                    <li>Market trend insights</li>
+                    <li>Connect with property owners</li>
+                </ul>
+                <a class="btn btn-lg">Invest Now</a>
+            </div>
+
+            <div class="role-section renter-section">
+                <i class="role-icon bi bi-house-heart"></i>
+                <h2>Renter</h2>
+                <p>Find your perfect home with tools designed for renters</p>
+                <ul class="feature-list">
+                    <li>Personalized property matching</li>
+                    <li>Virtual tours and scheduling</li>
+                    <li>Rental application tracking</li>
+                    <li>Tenant resources and support</li>
+                </ul>
+                <a class="btn btn-lg">Find Rentals</a>
+            </div>
+
+            <div class="role-section landlord-section">
+                <i class="role-icon bi bi-key"></i>
+                <h2>Landlord</h2>
+                <p>Manage your properties and find qualified tenants easily</p>
+                <ul class="feature-list">
+                    <li>Property listing management</li>
+                    <li>Tenant screening tools</li>
+                    <li>Rental payment processing</li>
+                    <li>Maintenance request handling</li>
+                </ul>
+                <a class="btn btn-lg">List Property</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+    
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--off-white);
+    color: var(--charcoal);
+}
+
+.main-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    text-align: center;
+    padding: 20px;
+    background-color: var(--cream);
+    box-shadow: 0 2px 10px rgba(184, 134, 11, 0.2);
+    z-index: 100;
+    color: var(--charcoal);
+}
+
+.role-selector {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.role-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.5s ease;
+    position: relative;
+    overflow: hidden;
+    padding: 20px;
+    color: var(--charcoal);
+    cursor: pointer;
+    border: 1px solid var(--light-gold);
+}
+
+.role-section:hover {
+    flex: 2; /* Expand on hover */
+    box-shadow: 0 0 30px rgba(184, 134, 11, 0.3);
+    z-index: 10;
+}
+
+.role-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    color: var(--dark-gold);
+}
+
+.role-section:hover h2 {
+    font-size: 3rem;
+}
+
+.role-section p {
+    opacity: 0.8;
+    max-width: 300px;
+    text-align: center;
+    margin-bottom: 30px;
+    transition: all 0.3s ease;
+}
+
+.role-section:hover p {
+    opacity: 1;
+}
+
+.btn {
+    background-color: var(--gold);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: all 0.3s ease;
+    padding: 10px 30px;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--dark-gold);
+    transition: all 0.4s ease;
+    z-index: -1;
+}
+
+.btn:hover::after {
+    left: 0;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(184, 134, 11, 0.3);
+    color: white;
+}
+
+.role-section .btn {
+    opacity: 1;
+    transform: scale(1);
+    transition: all 0.3s ease;
+}
+
+.role-section:hover .btn {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.investor-section {
+    background: linear-gradient(135deg, var(--cream), var(--off-white));
+}
+
+.renter-section {
+    background: linear-gradient(135deg, var(--light-gold), var(--cream));
+}
+
+.landlord-section {
+    background: linear-gradient(135deg, var(--off-white), var(--cream));
+}
+
+.role-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    color: var(--gold);
+}
+
+.role-section:hover .role-icon {
+    transform: scale(1.2);
+    color: var(--dark-gold);
+}
+
+.feature-list {
+    display: none;
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+.role-section:hover .feature-list {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+.feature-list li {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.feature-list li::before {
+    content: "✓";
+    margin-right: 10px;
+    color: var(--gold);
+    font-weight: bold;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

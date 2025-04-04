@@ -17,9 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from . import views
+from django.views.generic import TemplateView
 
 app_name = "users"
 urlpatterns = [
     path("register/", views.CreateUserView.as_view(), name="register"),
     path("login/", views.LoginUserView.as_view(), name="login"),
+    path("welcome/", TemplateView.as_view(template_name="users/welcome.html"), name="welcome")
 ]
