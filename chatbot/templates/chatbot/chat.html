@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RentMatch.AI</title>
-    
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
-    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
+        rel="stylesheet">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
         :root {
             --gold: #B8860B;
@@ -20,14 +26,14 @@
             --off-white: #F9F5EB;
             --bright-gold: #FFD700;
         }
-        
+
         body {
             background-color: var(--off-white);
             color: var(--charcoal);
             height: 100vh;
             overflow-x: hidden;
         }
-        
+
         /* Sidebar styles */
         .sidebar {
             background-color: var(--gold);
@@ -38,13 +44,13 @@
             top: 0;
             z-index: 100;
             transition: width 0.3s ease;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
-        
+
         .sidebar:hover {
             width: 280px;
         }
-        
+
         .sidebar-header {
             color: white;
             padding: 1.5rem 1rem;
@@ -54,23 +60,23 @@
             justify-content: center;
             transition: all 0.3s;
         }
-        
+
         .sidebar:hover .sidebar-header {
             justify-content: flex-start;
         }
-        
+
         .sidebar-icon {
             font-size: 2rem;
             transition: all 0.3s;
         }
-        
+
         .sidebar:hover .sidebar-icon {
             transform: scale(0);
             width: 0;
             margin: 0;
             overflow: hidden;
         }
-        
+
         .sidebar-logo-text {
             color: white;
             font-size: 1.4rem;
@@ -82,11 +88,11 @@
             white-space: nowrap;
             text-decoration: none;
         }
-        
+
         .sidebar:hover .sidebar-logo-text {
             opacity: 1;
         }
-        
+
         .menu-item {
             padding: 0.75rem 1.5rem;
             display: flex;
@@ -98,29 +104,30 @@
             white-space: nowrap;
             overflow: hidden;
         }
-        
-        .menu-item:hover, .menu-item.active {
+
+        .menu-item:hover,
+        .menu-item.active {
             background-color: var(--dark-gold);
             border-left-color: white;
             color: white;
         }
-        
+
         .menu-item i {
             font-size: 1.25rem;
             min-width: 25px;
             text-align: center;
         }
-        
+
         .menu-text {
             margin-left: 15px;
             opacity: 0;
             transition: opacity 0.3s;
         }
-        
+
         .sidebar:hover .menu-text {
             opacity: 1;
         }
-        
+
         /* Main content area */
         .main-content {
             margin-left: 80px;
@@ -129,17 +136,17 @@
             display: flex;
             flex-direction: column;
         }
-        
+
         .content-header {
             position: sticky;
             top: 0;
             background-color: white;
-            padding: 0 2rem 1rem;
+            padding: 1rem 1rem 1rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
-        
+
         /* Chat styles */
         .chat-container {
             flex-grow: 1;
@@ -148,7 +155,7 @@
             padding: 1.5rem;
             overflow: hidden;
         }
-        
+
         .chat-messages {
             flex-grow: 1;
             overflow-y: auto;
@@ -157,16 +164,16 @@
             flex-direction: column;
             gap: 1rem;
         }
-        
+
         .message {
             max-width: 75%;
             padding: 12px 15px;
             border-radius: 18px;
             position: relative;
             line-height: 1.5;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
-        
+
         .user-message {
             align-self: flex-end;
             background-color: white;
@@ -174,7 +181,7 @@
             border-bottom-right-radius: 5px;
             color: var(--charcoal);
         }
-        
+
         .bot-message {
             align-self: flex-start;
             background-color: #f5efd4;
@@ -182,17 +189,17 @@
             border-bottom-left-radius: 5px;
             color: var(--charcoal);
         }
-        
+
         .chat-input-container {
             margin-top: 1rem;
             padding: 1rem;
             background-color: white;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             display: flex;
             gap: 10px;
         }
-        
+
         .chat-input {
             flex-grow: 1;
             border: 1px solid #eee;
@@ -201,13 +208,13 @@
             font-size: 1rem;
             transition: all 0.2s;
         }
-        
+
         .chat-input:focus {
             outline: none;
             border-color: var(--gold);
             box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.2);
         }
-        
+
         .send-button {
             background-color: var(--gold);
             color: white;
@@ -221,81 +228,124 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        
+
         .send-button:hover {
             background-color: var(--dark-gold);
             transform: scale(1.05);
         }
-        
+
         .typing-indicator {
             display: none;
             align-self: flex-start;
-            background-color: rgba(223, 201, 138, 0.3);
+            background-color: #f5efd4;
             padding: 8px 15px;
             border-radius: 18px;
             margin-bottom: 10px;
+            border: 2px solid var(--light-gold);
+            border-bottom-left-radius: 5px;
         }
-        
+
         .typing-indicator span {
             height: 8px;
             width: 8px;
-            background-color: var(--bright-gold);
+            background-color: var(--light-gold);
             display: inline-block;
             border-radius: 50%;
             animation: typing 1s infinite ease-in-out;
             margin: 0 2px;
         }
-        
+
         .typing-indicator span:nth-child(2) {
             animation-delay: 0.2s;
         }
-        
+
         .typing-indicator span:nth-child(3) {
             animation-delay: 0.4s;
         }
-        
+
         @keyframes typing {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-7px); }
-            100% { transform: translateY(0); }
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-7px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
         }
-        
+
         .message-time {
             font-size: 0.75rem;
             color: #777;
             margin-top: 5px;
             text-align: right;
         }
-        
+
         .welcome-message {
             text-align: center;
             color: var(--gold);
             margin: 1rem 0;
             font-weight: 500;
         }
-        
+
         .chat-header-title {
             font-size: 1.1rem;
             font-weight: 600;
             color: var(--gold);
         }
-        
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .sidebar {
                 width: 60px;
             }
-            
+
             .sidebar:hover {
                 width: 240px;
             }
-            
+
             .main-content {
                 margin-left: 60px;
             }
         }
+
+        /* Basic Markdown styles */
+        .bot-message h1,
+        .bot-message h2,
+        .bot-message h3 {
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+
+        .bot-message p {
+            margin-bottom: 0.5em;
+        }
+
+        .bot-message code {
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .bot-message pre {
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 1em;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .bot-message ul,
+        .bot-message ol {
+            margin-left: 1.5em;
+            margin-bottom: 0.5em;
+        }
     </style>
 </head>
+
 <body>
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
@@ -334,7 +384,7 @@
             </a>
         </div>
     </div>
-    
+
     <!-- Main Content -->
     <div class="main-content" id="main-content">
         <div class="content-header">
@@ -354,33 +404,18 @@
                 </button>
             </div>
         </div>
-        
+
         <div class="chat-container">
             <div class="chat-messages" id="chat-messages">
                 <p class="welcome-message">Welcome to RentMatch.AI! How can I help you today?</p>
-                
-                <div class="message bot-message">
-                    Hello! I'm your RentMatch.AI assistant. I can help you find the perfect rental property, answer questions about listings, or assist with your application status.
-                    <div class="message-time">Just now</div>
-                </div>
-                
-                <div class="message user-message">
-                    Hi! I'm looking for a 2-bedroom apartment in downtown, preferably under $1,500/month.
-                    <div class="message-time">Just now</div>
-                </div>
-                
-                <div class="message bot-message">
-                    Great! I'll help you find a 2-bedroom apartment in downtown within your budget. We have several options available. Would you prefer a place with parking, or is public transportation access more important to you?
-                    <div class="message-time">Just now</div>
-                </div>
-                
-                <div class="typing-indicator" id="typing-indicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
             </div>
-            
+
+            <div class="typing-indicator" id="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
             <div class="chat-input-container">
                 <input type="text" class="chat-input" id="chat-input" placeholder="Type your message here..." />
                 <button class="send-button" id="send-button">
@@ -389,78 +424,130 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Bootstrap 5 JS with Popper -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
-        // Get DOM elements
-        const chatMessages = document.getElementById('chat-messages');
-        const chatInput = document.getElementById('chat-input');
-        const sendButton = document.getElementById('send-button');
-        const typingIndicator = document.getElementById('typing-indicator');
-        
-        // Chat functionality
-        sendButton.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
+        $(document).ready(function () {
+            // Define WebSocket connection
+            const chatSocket = new WebSocket(
+                'ws://'
+                + window.location.host
+                + '/ws/ai-chat/'  // Adjust this path to match your Django routing
+            );
+
+            // Connection established handler
+            chatSocket.onopen = function (e) {
+                console.log('WebSocket connection established');
+            };
+
+            // Message reception (from server) - for future use
+            chatSocket.onmessage = function (e) {
+                console.log('Message received from server:', e.data);
+                try {
+                    const data = JSON.parse(e.data);
+
+                    // Create a new bot message element
+                    const messageDiv = $('<div class="message bot-message"></div>');
+                    messageDiv.text(data.message);
+
+                    messageDiv.html(marked.parse(data.message))
+
+                    // Add timestamp
+                    const timeDiv = $('<div class="message-time">Just now</div>');
+                    messageDiv.append(timeDiv);
+
+                    // Hide typing indicator
+                    $('#typing-indicator').hide();
+
+                    // Add message to chat
+                    $('#chat-messages').append(messageDiv);
+
+                    // Scroll to bottom
+                    scrollToBottom();
+                } catch (error) {
+                    console.error('Error processing message:', error);
+                }
+            };
+
+            // Connection close handler
+            chatSocket.onclose = function (e) {
+                console.log('WebSocket connection closed:', e.code, e.reason);
+                if (e.code !== 1000) {
+                    console.error('Connection closed unexpectedly');
+                    // This could happen if the user is not authenticated
+                    $('#chat-messages').append('<div class="message bot-message">Connection closed. You may need to log in.</div>');
+                }
+            };
+
+            // Error handler
+            chatSocket.onerror = function (e) {
+                console.error('WebSocket error:', e);
+            };
+
+            // Focus the input field
+            $('#chat-input').focus();
+
+            // Handle Enter key press
+            $('#chat-input').on('keyup', function (e) {
+                if (e.key === 'Enter') {
+                    $('#send-button').click();
+                }
+            });
+
+            // Handle send button click
+            $('#send-button').on('click', function () {
+                const message = $('#chat-input').val();
+                if (message.trim() === '') return;
+
+                // Create a new user message element
+                const messageDiv = $('<div class="message user-message"></div>');
+                messageDiv.text(message);
+
+                // Add timestamp
+                const timeDiv = $('<div class="message-time"></div>').text(getCurrentTime());
+                messageDiv.append(timeDiv);
+
+                // Add message to chat
+                $('#chat-messages').append(messageDiv);
+
+                // Show typing indicator for testing
+                $('#typing-indicator').show();
+
+                // Send message through WebSocket
+                chatSocket.send(JSON.stringify({
+                    'message': message
+                }));
+
+                // Clear input field
+                $('#chat-input').val('');
+
+                // Scroll to bottom
+                scrollToBottom();
+
+
+            });
+
+            // Function to scroll chat to bottom
+            function scrollToBottom() {
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function getCurrentTime() {
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                // Convert to 12-hour format
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const formattedHours = hours % 12 || 12; // Convert 0 to 12
+                const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+
+                return `${formattedHours}:${formattedMinutes} ${ampm}`;
             }
         });
-        
-        function sendMessage() {
-            const message = chatInput.value.trim();
-            if (message) {
-                // Add user message to UI
-                addMessage(message, 'user');
-                chatInput.value = '';
-                
-                // Show typing indicator
-                typingIndicator.style.display = 'block';
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                
-                // Simulate bot response after a delay
-                setTimeout(() => {
-                    typingIndicator.style.display = 'none';
-                    
-                    // Simple bot responses based on keywords
-                    let botResponse = "I'm processing your request. Could you provide more details?";
-                    
-                    if (message.toLowerCase().includes("price") || message.toLowerCase().includes("cost")) {
-                        botResponse = "Our rental properties range from $800 to $3,000 per month depending on location, size, and amenities. What's your budget range?";
-                    } else if (message.toLowerCase().includes("location") || message.toLowerCase().includes("area")) {
-                        botResponse = "We have properties available in Downtown, Westside, Northend, and Eastville. Which area interests you the most?";
-                    } else if (message.toLowerCase().includes("bedroom") || message.toLowerCase().includes("bath")) {
-                        botResponse = "We have studio apartments, 1-3 bedroom apartments, and some townhouses with up to 4 bedrooms. How many bedrooms are you looking for?";
-                    } else if (message.toLowerCase().includes("application") || message.toLowerCase().includes("apply")) {
-                        botResponse = "You can apply directly through our platform. We'll need your ID, proof of income, and references. Would you like me to start an application for you?";
-                    } else if (message.toLowerCase().includes("pet") || message.toLowerCase().includes("dog") || message.toLowerCase().includes("cat")) {
-                        botResponse = "Many of our properties are pet-friendly! There may be additional pet deposits or monthly pet rent. What kind of pet do you have?";
-                    }
-                    
-                    addMessage(botResponse, 'bot');
-                }, 1000 + Math.random() * 1000);
-            }
-        }
-        
-        function addMessage(content, sender) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
-            messageDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
-            
-            messageDiv.innerHTML = `
-                ${content}
-                <div class="message-time">${getCurrentTime()}</div>
-            `;
-            
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        function getCurrentTime() {
-            const now = new Date();
-            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
     </script>
 </body>
+
 </html>a

@@ -21,6 +21,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("users/", include("users.urls")),
-    path("chat/", include("chatbot.urls")),
+    path("chatbot/", include("chatbot.urls")),
     path('admin/', admin.site.urls),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
