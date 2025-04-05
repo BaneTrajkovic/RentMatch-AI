@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 
 class ChatConsumer(WebsocketConsumer):
 
-    chat_sessions = {}
+    # chat_sessions = {}
     
     def connect(self):
         self.user : User = self.scope["user"] 
@@ -18,13 +18,13 @@ class ChatConsumer(WebsocketConsumer):
             user_id = self.user.id
 
             # If not yet created chat session
-            if self.user.id not in self.chat_sessions:
+            # if self.user.id not in self.chat_sessions:
 
-                # Create client
-                client = genai.Client(api_key=constants.GEMINI_API_KEY)
+            # Create client
+            client = genai.Client(api_key=constants.GEMINI_API_KEY)
                 
-                # Add user chat to chat sessions
-                self.chat_sessions[user_id] = client.chats.create(model="gemini-2.0-flash")
+            # Add user chat to chat sessions
+            self.chat_sessions[user_id] = client.chats.create(model="gemini-2.0-flash")
 
             # Setup current user chat
             self.chat = self.chat_sessions[user_id]
