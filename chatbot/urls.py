@@ -18,8 +18,10 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 from django.views.generic import TemplateView
+from .views import ChatbotView, NewChatbotView
 
 app_name = "chatbot"
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="chatbot/chat.html"), name="chat"),
+    path("new/", NewChatbotView.as_view(), name="new-conversation"),
+    path("<int:pk>/", ChatbotView.as_view(), name="existing-conversation"),
 ]
