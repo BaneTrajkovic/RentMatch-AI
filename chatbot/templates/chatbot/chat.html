@@ -376,6 +376,22 @@
             text-overflow: ellipsis;
             max-width: 180px;
         }
+
+        /* Add this to your existing CSS */
+        .submenu-item.active {
+            background-color: rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+        }
+
+        /* Special style for the new chat button */
+        #new-chat-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            margin-bottom: 2px;
+        }
+
+        #new-chat-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 
@@ -397,18 +413,22 @@
                 <span class="menu-text">Chat</span>
             </a>
             <div class="submenu" id="chat-submenu">
-                <a href="#" class="submenu-item">
-                    <div class="chat-preview">Brooklyn Options - Apr 10</div>
+                <!-- New Chat option always at the top -->
+                <a href="{% url 'chatbot:new-conversation' %}" class="submenu-item" id="new-chat-item">
+                    <div class="chat-preview"><i class="bi bi-plus-circle me-1"></i>Start New Conversation</div>
                 </a>
-                <a href="#" class="submenu-item">
-                    <div class="chat-preview">Brooklyn Options - Apr 8</div>
-                </a>
-                <a href="#" class="submenu-item">
-                    <div class="chat-preview">Manhattan Studio - Apr 5</div>
-                </a>
-                <a href="#" class="submenu-item">
-                    <div class="chat-preview">Queens Neighborhood Guide - Apr 2</div>
-                </a>
+
+                <!-- This is where existing conversations will be loaded dynamically -->
+                <div id="conversations-list">
+                    <!-- Conversations will be added here via JavaScript -->
+                    {% for conv in user_conversations %}
+                    <a href="{% url 'chatbot:existing-conversation' conv.id %}"
+                        class="submenu-item {% if conversation.id == conv.id %}active{% endif %}"
+                        data-conversation-id="{{ conv.id }}">
+                        <div class="chat-preview">{{ conv.title }}</div>
+                    </a>
+                    {% endfor %}
+                </div>
             </div>
             <a href="#" class="menu-item">
                 <i class="bi bi-search"></i>
@@ -455,7 +475,20 @@
 
         <div class="chat-container">
             <div class="chat-messages" id="chat-messages">
+                {% if conversation and conversation.chatbot_messages.exists %}
+                {% for message in conversation.chatbot_messages.all %}
+                <div class="message {% if message.role == 'user' %}user-message{% else %}bot-message{% endif %}">
+                    {% if message.role == 'user' %}
+                    {{ message.content }}
+                    {% else %}
+                    <div class="message-content">{{ message.content }}</div>
+                    {% endif %}
+                    <div class="message-time">{{ message.timestamp|date:"g:i A" }}</div>
+                </div>
+                {% endfor %}
+                {% else %}
                 <p class="welcome-message">Welcome to RentMatch.AI! How can I help you today?</p>
+                {% endif %}
             </div>
 
             <div class="typing-indicator" id="typing-indicator">
@@ -516,6 +549,9 @@
 
                         // Update the page title or other elements if needed
                         document.title = data.title + " | RentMatch.AI";
+
+                        // Add the new conversation to the sidebar
+                        updateSidebarWithNewConversation(data.conversation_id, data.title);
 
                         return;
                     }
@@ -622,6 +658,37 @@
 
                 return `${formattedHours}:${formattedMinutes} ${ampm}`;
             }
+
+            function updateSidebarWithNewConversation(conversationId, title) {
+                // Create a new conversation item
+                const newConvItem = $(`
+                    <a href="/chatbot/${conversationId}/" 
+                    class="submenu-item active" 
+                    data-conversation-id="${conversationId}">
+                        <div class="chat-preview">${title}</div>
+                    </a>
+                `);
+
+                // Remove 'active' class from all other items
+                $('.submenu-item').removeClass('active');
+
+                // Insert the new conversation at the top of the list (after the "New Chat" option)
+                $('#new-chat-item').after(newConvItem);
+
+                // Make sure the submenu is open to show the new conversation
+                $('#chat-submenu').addClass('open');
+            }
+
+            // Process any existing bot messages with markdown
+            $('.bot-message .message-content').each(function () {
+                const rawContent = $(this).html();
+                $(this).html(marked.parse(rawContent));
+            });
+
+            // Scroll to the bottom of the chat on page load
+            setTimeout(function () {
+                scrollToBottom();
+            }, 100);
 
             // Sidebar menu handlers
             $('#chat-menu-item').on('click', function (e) {

@@ -66,7 +66,7 @@ def get_chat_from_conversation(conversation: ChatbotConversation) -> genai.Clien
     
     except ChatbotConversation.DoesNotExist:
         # Handle the case where the conversation doesn't exist
-        raise ValueError(f"Conversation with ID {conversation_id} not found")
+        raise ValueError(f"Conversation is not found")
     
     except Exception as e:
         # Handle any other errors

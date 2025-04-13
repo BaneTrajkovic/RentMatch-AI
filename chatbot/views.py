@@ -13,8 +13,11 @@ class ChatbotView(LoginRequiredMixin, DetailView):
     template_name = "chatbot/chat.html"
     context_object_name = "conversation"
 
-    def get_object(self, queryset: QuerySet[Any] | None = ...) -> Model:
-        
+    def get_object(self, queryset=None):
+
+        if queryset is None:
+            queryset = self.get_queryset()
+            
         conversation = super().get_object(queryset=queryset)
         
         # Only allowing the user who owns the conversation to actually see the conversation
@@ -22,11 +25,28 @@ class ChatbotView(LoginRequiredMixin, DetailView):
             raise Http404("Conversation not found")
         
         return conversation
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Add user's conversations to context
+        context['user_conversations'] = ChatbotConversation.objects.filter(user=self.request.user) # Most recent first
+        
+        return context
     
 
 class NewChatbotView(LoginRequiredMixin, TemplateView):
     template_name = "chatbot/chat.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Add user's conversations to context
+        context['user_conversations'] = ChatbotConversation.objects.filter(user=self.request.user) # Most recent first
     
+        return context
+
+
 
 
 

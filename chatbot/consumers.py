@@ -3,6 +3,17 @@ from channels.generic.websocket import WebsocketConsumer
 from .models import ChatbotConversation, ChatbotMessage
 from .helpers import get_chat_from_conversation
 
+CONVERSATION_TITLE = """
+Analyze our complete conversation history and create a specific, contextual title that:
+1. Reflects the exact topic we've discussed
+2. Captures the progression from initial question to current direction
+3. Includes any unique aspects or specific approaches mentioned
+4. Incorporates the ultimate goal or application I'm working toward
+5. Uses terminology specific to our exchange, not generic descriptions
+
+Return only the title text (maximum 40 characters), with no explanations or additional text.
+"""
+
 class ChatConsumer(WebsocketConsumer):
 
     def connect(self):
@@ -59,8 +70,8 @@ class ChatConsumer(WebsocketConsumer):
         response_text = response.text
         
         # Update title for new conversations
-        if self.conversation.title == "New Conversation":
-            title_response = self.chat.send_message("Based on my initial inquiry, suggest a short, descriptive title for this conversation (respond with just the title, no explanations, maximum 40 characters and forget that I ever asked you this message)")
+        if self.conversation.title == "New Conversation" and len(self.chat.get_history()) // 2 > 3:
+            title_response = self.chat.send_message(CONVERSATION_TITLE)
             self.conversation.title = title_response.text[:50]
             self.conversation.save()
             
