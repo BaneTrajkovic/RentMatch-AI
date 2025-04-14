@@ -1,67 +1,95 @@
 import json
-from google import genai
-import constants
-
 from channels.generic.websocket import WebsocketConsumer
-from django.contrib.auth.models import User
+from .models import ChatbotConversation, ChatbotMessage
+from .helpers import get_chat_from_conversation
+
+CONVERSATION_TITLE = """
+Analyze our complete conversation history and create a specific, contextual title that:
+1. Reflects the exact topic we've discussed
+2. Captures the progression from initial question to current direction
+3. Includes any unique aspects or specific approaches mentioned
+4. Incorporates the ultimate goal or application I'm working toward
+5. Uses terminology specific to our exchange, not generic descriptions
+
+Return only the title text (maximum 40 characters), with no explanations or additional text.
+"""
 
 class ChatConsumer(WebsocketConsumer):
 
-    # chat_sessions = {}
-    
     def connect(self):
-        self.user : User = self.scope["user"] 
-        
-        # Check if user is authenticated
-        if self.user.is_authenticated:
-            
-            user_id = self.user.id
-
-            # If not yet created chat session
-            # if self.user.id not in self.chat_sessions:
-
-            # Create client
-            client = genai.Client(api_key=constants.GEMINI_API_KEY)
-                
-            # Add user chat to chat sessions
-            self.chat_sessions[user_id] = client.chats.create(model="gemini-2.0-flash")
-
-            # Setup current user chat
-            self.chat = self.chat_sessions[user_id]
-            self.chat.send_message("""
-You are RentMatch.AI, a friendly and knowledgeable rental assistant specializing in NYC housing. Your role is to help users find their ideal apartment through natural conversation.
-
-Guidelines:
-- Keep responses conversational and approximately the same length as the user's messages.
-- Be warm and personable - build rapport like a friend, not just an information tool.
-- Learn about the user organically through conversation, not through direct questioning.
-- Focus exclusively on NYC rental assistance - politely redirect other topics.
-- Simulate searching through listings from sources like StreetEasy, Zillow, Facebook Marketplace, and Craigslist.
-- Describe specific (but fictional) apartment listings with realistic details when appropriate.
-- Use neighborhood-specific knowledge to guide recommendations.
-- Organize your responses with clear formatting.
-- Guide the conversation to gradually learn: budget, desired neighborhoods, apartment size, amenities, commute preferences, lifestyle priorities.
-- Suggest alternatives when user criteria might be unrealistic for NYC.
-- Mention NYC-specific considerations like broker fees, rent stabilization, transit access, and seasonal rental market fluctuations.
-
-Remember, you're both a helpful guide to NYC housing AND a friendly conversation partner. Make the apartment search process feel personal and supportive.
-""")
-            
-            self.accept()
-        
+    
+        if self.scope["user"].is_authenticated:
+    
+            if self.scope["path"] == "/ws/chatbot/new/":
+    
+                self.conversation = None
+                self.chat = None
+                self.accept()  # Accept the connection
+    
+            elif "conversation_id" in self.scope["url_route"]["kwargs"]:
+    
+                conversation_id = self.scope["url_route"]["kwargs"]["conversation_id"]
+    
+                try:
+    
+                    self.conversation = ChatbotConversation.objects.get(id=conversation_id, user=self.scope["user"])
+                    self.chat = get_chat_from_conversation(self.conversation)
+                    self.accept()  # Accept the connection
+    
+                except ChatbotConversation.DoesNotExist:
+                    
+                    self.close()
+                    return
+            else:
+    
+                self.close()
+    
         else:
-        
+    
             self.close()
 
-    def disconnect(self, code):
-        return super().disconnect(code)
     
     def receive(self, text_data=None, bytes_data=None):
 
-        # here self.chat responds
-        print(text_data)
-        user_input_dict = json.loads(text_data)
-
-        response = self.chat.send_message(user_input_dict["message"])
-
-        self.send(text_data=json.dumps({"message" : response.text}))
+        user_message = json.loads(text_data)["message"]
+        
+        # Create a new conversation on first message if needed
+        if self.conversation is None:
+            self.conversation = ChatbotConversation.objects.create(user=self.scope["user"])
+            self.chat = get_chat_from_conversation(self.conversation)
+            
+        # Save user message to database
+        ChatbotMessage.objects.create(
+            conversation=self.conversation,
+            role='user',
+            content=user_message
+        )
+        
+        # Send to AI and get response
+        response = self.chat.send_message(user_message)
+        response_text = response.text
+        
+        # Update title for new conversations
+        if self.conversation.title == "New Conversation" and len(self.chat.get_history()) // 2 > 3:
+            title_response = self.chat.send_message(CONVERSATION_TITLE)
+            self.conversation.title = title_response.text[:50]
+            self.conversation.save()
+            
+            self.send(text_data=json.dumps({
+                "type": "conversation_created",
+                "conversation_id": self.conversation.id,
+                "title": self.conversation.title
+            }))
+        
+        # Save bot response
+        ChatbotMessage.objects.create(
+            conversation=self.conversation,
+            role='model',
+            content=response_text
+        )
+        
+        # Send response to client
+        self.send(text_data=json.dumps({
+            "type": "chat_message",
+            "message": response_text
+        }))

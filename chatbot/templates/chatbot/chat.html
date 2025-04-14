@@ -343,6 +343,55 @@
             margin-left: 1.5em;
             margin-bottom: 0.5em;
         }
+
+        /* Add this to your style section */
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background-color: rgba(0, 0, 0, 0.15);
+        }
+
+        .submenu.open {
+            max-height: 300px;
+        }
+
+        .submenu-item {
+            padding: 0.5rem 1rem 0.5rem 3rem;
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .submenu-item:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-preview {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+
+        /* Add this to your existing CSS */
+        .submenu-item.active {
+            background-color: rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+        }
+
+        /* Special style for the new chat button */
+        #new-chat-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            margin-bottom: 2px;
+        }
+
+        #new-chat-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 
@@ -354,14 +403,33 @@
             <a class="sidebar-logo-text" href="{% url 'users:welcome' %}">RentMatch.AI</a>
         </div>
         <div class="sidebar-menu mt-4">
-            <a href="#" class="menu-item active">
-                <i class="bi bi-chat-dots-fill"></i>
-                <span class="menu-text">Chat</span>
-            </a>
             <a href="#" class="menu-item">
                 <i class="bi bi-house-door"></i>
                 <span class="menu-text">Properties</span>
             </a>
+            <!-- Replace your existing Chat menu item with this -->
+            <a href="#" class="menu-item active" id="chat-menu-item">
+                <i class="bi bi-chat-dots-fill"></i>
+                <span class="menu-text">Chat</span>
+            </a>
+            <div class="submenu" id="chat-submenu">
+                <!-- New Chat option always at the top -->
+                <a href="{% url 'chatbot:new-conversation' %}" class="submenu-item" id="new-chat-item">
+                    <div class="chat-preview"><i class="bi bi-plus-circle me-1"></i>Start New Conversation</div>
+                </a>
+
+                <!-- This is where existing conversations will be loaded dynamically -->
+                <div id="conversations-list">
+                    <!-- Conversations will be added here via JavaScript -->
+                    {% for conv in user_conversations %}
+                    <a href="{% url 'chatbot:existing-conversation' conv.id %}"
+                        class="submenu-item {% if conversation.id == conv.id %}active{% endif %}"
+                        data-conversation-id="{{ conv.id }}">
+                        <div class="chat-preview">{{ conv.title }}</div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
             <a href="#" class="menu-item">
                 <i class="bi bi-search"></i>
                 <span class="menu-text">Search</span>
@@ -407,7 +475,20 @@
 
         <div class="chat-container">
             <div class="chat-messages" id="chat-messages">
+                {% if conversation and conversation.chatbot_messages.exists %}
+                {% for message in conversation.chatbot_messages.all %}
+                <div class="message {% if message.role == 'user' %}user-message{% else %}bot-message{% endif %}">
+                    {% if message.role == 'user' %}
+                    {{ message.content }}
+                    {% else %}
+                    <div class="message-content">{{ message.content }}</div>
+                    {% endif %}
+                    <div class="message-time">{{ message.timestamp|date:"g:i A" }}</div>
+                </div>
+                {% endfor %}
+                {% else %}
                 <p class="welcome-message">Welcome to RentMatch.AI! How can I help you today?</p>
+                {% endif %}
             </div>
 
             <div class="typing-indicator" id="typing-indicator">
@@ -430,29 +511,54 @@
 
     <script>
         $(document).ready(function () {
-            // Define WebSocket connection
-            const chatSocket = new WebSocket(
-                'ws://'
-                + window.location.host
-                + '/ws/ai-chat/'  // Adjust this path to match your Django routing
-            );
+            let botIsReplying = false;
+            let chatSocket;
+
+            // Get conversation information from the template context
+            const conversationId = "{{ conversation.id|default:'new' }}";
+
+            // Set up WebSocket connection based on conversation ID
+            if (conversationId === "new") {
+                chatSocket = new WebSocket(
+                    'ws://' + window.location.host + '/ws/chatbot/new/'
+                );
+            } else {
+                chatSocket = new WebSocket(
+                    'ws://' + window.location.host + '/ws/chatbot/' + conversationId + '/'
+                );
+            }
 
             // Connection established handler
             chatSocket.onopen = function (e) {
                 console.log('WebSocket connection established');
             };
 
-            // Message reception (from server) - for future use
+            // Message handler
             chatSocket.onmessage = function (e) {
                 console.log('Message received from server:', e.data);
                 try {
                     const data = JSON.parse(e.data);
 
-                    // Create a new bot message element
-                    const messageDiv = $('<div class="message bot-message"></div>');
-                    messageDiv.text(data.message);
+                    // Handle the conversation_created message type
+                    if (data.type === "conversation_created") {
+                        console.log("New conversation created with ID:", data.conversation_id);
 
-                    messageDiv.html(marked.parse(data.message))
+                        // Update browser URL without refreshing the page
+                        const newUrl = window.location.origin + '/chatbot/' + data.conversation_id + '/';
+                        window.history.pushState({ path: newUrl }, '', newUrl);
+
+                        // Update the page title or other elements if needed
+                        document.title = data.title + " | RentMatch.AI";
+
+                        // Add the new conversation to the sidebar
+                        updateSidebarWithNewConversation(data.conversation_id, data.title);
+
+                        return;
+                    }
+
+                    // Handle regular chat messages
+                    const messageDiv = $('<div class="message bot-message"></div>');
+                    messageDiv.html(marked.parse(data.message));
 
                     // Add timestamp
                     const timeDiv = $('<div class="message-time">Just now</div>');
@@ -466,8 +572,23 @@
 
                     // Scroll to bottom
                     scrollToBottom();
+
+                    // Reset bot replying state
+                    botIsReplying = false;
+
+                    // Change button icon back
+                    $('#send-button i').removeClass('bi-hourglass-split').addClass('bi-send-fill');
+
+                    // Re-enable the input
+                    $('#chat-input').prop('disabled', false);
+                    $('#chat-input').focus();
+
                 } catch (error) {
                     console.error('Error processing message:', error);
+                    // Also reset state on error
+                    botIsReplying = false;
+                    $('#send-button i').removeClass('bi-hourglass-split').addClass('bi-send-fill');
+                    $('#chat-input').prop('disabled', false);
                 }
             };
 
@@ -476,7 +597,6 @@
                 console.log('WebSocket connection closed:', e.code, e.reason);
                 if (e.code !== 1000) {
                     console.error('Connection closed unexpectedly');
-                    // This could happen if the user is not authenticated
                     $('#chat-messages').append('<div class="message bot-message">Connection closed. You may need to log in.</div>');
                 }
             };
@@ -486,50 +606,43 @@
                 console.error('WebSocket error:', e);
             };
 
-            // Focus the input field
+            // Rest of your existing code...
             $('#chat-input').focus();
 
-            // Handle Enter key press
             $('#chat-input').on('keyup', function (e) {
                 if (e.key === 'Enter') {
                     $('#send-button').click();
                 }
             });
 
-            // Handle send button click
             $('#send-button').on('click', function () {
+                if (botIsReplying) return;
+
                 const message = $('#chat-input').val();
                 if (message.trim() === '') return;
 
-                // Create a new user message element
+                botIsReplying = true;
+                $('#send-button i').removeClass('bi-send-fill').addClass('bi-hourglass-split');
+                $('#chat-input').prop('disabled', true);
+
                 const messageDiv = $('<div class="message user-message"></div>');
                 messageDiv.text(message);
 
-                // Add timestamp
                 const timeDiv = $('<div class="message-time"></div>').text(getCurrentTime());
                 messageDiv.append(timeDiv);
 
-                // Add message to chat
                 $('#chat-messages').append(messageDiv);
-
-                // Show typing indicator for testing
                 $('#typing-indicator').show();
 
-                // Send message through WebSocket
                 chatSocket.send(JSON.stringify({
                     'message': message
                 }));
 
-                // Clear input field
                 $('#chat-input').val('');
-
-                // Scroll to bottom
                 scrollToBottom();
-
-
             });
 
-            // Function to scroll chat to bottom
+            // Keep your existing utility functions
             function scrollToBottom() {
                 const chatMessages = document.getElementById('chat-messages');
                 chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -539,13 +652,53 @@
                 const now = new Date();
                 const hours = now.getHours();
                 const minutes = now.getMinutes();
-                // Convert to 12-hour format
                 const ampm = hours >= 12 ? 'PM' : 'AM';
-                const formattedHours = hours % 12 || 12; // Convert 0 to 12
+                const formattedHours = hours % 12 || 12;
                 const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
                 return `${formattedHours}:${formattedMinutes} ${ampm}`;
             }
+
+            function updateSidebarWithNewConversation(conversationId, title) {
+                // Create a new conversation item
+                const newConvItem = $(`
+                    <a href="/chatbot/${conversationId}/" 
+                    class="submenu-item active" 
+                    data-conversation-id="${conversationId}">
+                        <div class="chat-preview">${title}</div>
+                    </a>
+                `);
+
+                // Remove 'active' class from all other items
+                $('.submenu-item').removeClass('active');
+
+                // Insert the new conversation at the top of the list (after the "New Chat" option)
+                $('#new-chat-item').after(newConvItem);
+
+                // Make sure the submenu is open to show the new conversation
+                $('#chat-submenu').addClass('open');
+            }
+
+            // Process any existing bot messages with markdown
+            $('.bot-message .message-content').each(function () {
+                const rawContent = $(this).html();
+                $(this).html(marked.parse(rawContent));
+            });
+
+            // Scroll to the bottom of the chat on page load
+            setTimeout(function () {
+                scrollToBottom();
+            }, 100);
+
+            // Sidebar menu handlers
+            $('#chat-menu-item').on('click', function (e) {
+                e.preventDefault();
+                $('#chat-submenu').toggleClass('open');
+            });
+
+            $('#sidebar').on('mouseleave', function () {
+                $('.submenu').removeClass('open');
+            });
         });
     </script>
 </body>
