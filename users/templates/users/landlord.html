@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Landlord Dashboard - RentMatch.AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --gold: #B8860B;
+      --dark-gold: #9A7209;
+      --charcoal: #333333;
+      --cream: #FFF8E6;
+      --light-gold: #DFC98A;
+      --off-white: #F9F5EB;
+      --bright-gold: #FFD700;
+    }
+
+    body {
+      background-color: var(--off-white);
+      color: var(--charcoal);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      background-color: var(--gold);
+      height: 100vh;
+      width: 80px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 100;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar:hover {
+      width: 250px;
+    }
+
+    .sidebar-header {
+      color: white;
+      padding: 1.5rem 1rem;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .sidebar:hover .sidebar-header {
+      justify-content: flex-start;
+    }
+
+    .sidebar-icon {
+      font-size: 2rem;
+      transition: all 0.3s;
+    }
+
+    .sidebar:hover .sidebar-icon {
+      transform: scale(0);
+      width: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .sidebar-logo-text {
+      color: white;
+      font-size: 1.4rem;
+      font-weight: bold;
+      position: absolute;
+      left: 1.5rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .sidebar:hover .sidebar-logo-text {
+      opacity: 1;
+    }
+
+    .menu-item {
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      color: white;
+      text-decoration: none;
+      transition: all 0.2s;
+      border-left: 4px solid transparent;
+    }
+
+    .menu-item:hover,
+    .menu-item.active {
+      background-color: var(--dark-gold);
+      border-left-color: white;
+      color: white;
+    }
+
+    .menu-item i {
+      font-size: 1.25rem;
+      min-width: 25px;
+      text-align: center;
+    }
+
+    .menu-text {
+      margin-left: 15px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .sidebar:hover .menu-text {
+      opacity: 1;
+    }
+
+    .main-content {
+      margin-left: 80px;
+      padding: 2rem;
+      transition: all 0.3s;
+    }
+
+    .sidebar:hover ~ .main-content {
+      margin-left: 250px;
+    }
+
+    .card-title {
+      color: var(--gold);
+    }
+
+    .section-title {
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      font-weight: bold;
+      font-size: 1.75rem;
+      color: var(--dark-gold);
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <i class="bi bi-house-heart-fill sidebar-icon"></i>
+      <a class="sidebar-logo-text" href="#">RentMatch.AI</a>
+    </div>
+    <div class="sidebar-menu mt-4">
+      <a href="#" class="menu-item active"><i class="bi bi-house-door"></i><span class="menu-text">Dashboard</span></a>
+      <a href="#" class="menu-item"><i class="bi bi-houses"></i><span class="menu-text">Properties</span></a>
+      <a href="#" class="menu-item"><i class="bi bi-chat-dots-fill"></i><span class="menu-text">Leads</span></a>
+      <a href="#" class="menu-item"><i class="bi bi-graph-up"></i><span class="menu-text">Analytics</span></a>
+      <a href="#" class="menu-item"><i class="bi bi-lightbulb"></i><span class="menu-text">Insights</span></a>
+      <a href="#" class="menu-item"><i class="bi bi-gear"></i><span class="menu-text">Settings</span></a>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content container">
+    <h1 class="text-center mb-5" style="color:#B8860B">🏠 Landlord Dashboard</h1>
+
+    <!-- Dashboard Overview -->
+    <div class="row g-4">
+      <div class="col-md-3">
+        <div class="card p-3">
+          <h5 class="card-title">Total Monthly Revenue</h5>
+          <p>$25,400</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-3">
+          <h5 class="card-title">Occupancy Rate</h5>
+          <p>87%</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-3">
+          <h5 class="card-title">Vacant Listings</h5>
+          <p>3</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-3">
+          <h5 class="card-title">Market Alert</h5>
+          <p>54 Broadway underpriced by 10%</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Properties -->
+    <div class="section-title">🏢 Properties</div>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Address</th>
+          <th>Rent</th>
+          <th>Status</th>
+          <th>Insight</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Elm St Apt</td>
+          <td>23 Elm St</td>
+          <td>$2,700</td>
+          <td>Vacant</td>
+          <td>Just became vacant</td>
+        </tr>
+        <tr>
+          <td>Broadway Loft</td>
+          <td>54 Broadway</td>
+          <td>$3,200</td>
+          <td>Occupied</td>
+          <td>10% under market</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Leads -->
+    <div class="section-title">📨 Leads</div>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Budget</th>
+          <th>Pet Owner</th>
+          <th>Credit Score</th>
+          <th>Lead Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Jane Doe</td>
+          <td>$2,800</td>
+          <td>Yes</td>
+          <td>720</td>
+          <td>High</td>
+        </tr>
+        <tr>
+          <td>Mark Smith</td>
+          <td>$3,500</td>
+          <td>No</td>
+          <td>680</td>
+          <td>Medium</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Analytics -->
+    <div class="section-title">📊 Analytics</div>
+    <div class="card p-4 mb-4">
+      <h5>Rent Pricing History vs Market</h5>
+      <canvas id="rentChart" width="400" height="150"></canvas>
+    </div>
+
+    <!-- Insights -->
+    <div class="section-title">💡 Insights</div>
+    <ul class="list-group">
+      <li class="list-group-item">Demand up 30% for 3BD in Downtown</li>
+      <li class="list-group-item">Laundry adds +25% to engagement</li>
+      <li class="list-group-item">Run simulation: +5% rent = -12% leads</li>
+    </ul>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('rentChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [
+          {
+            label: 'My Listings',
+            data: [2500, 2700, 2600, 2750, 2900, 3000],
+            borderColor: '#B8860B',
+            tension: 0.3
+          },
+          {
+            label: 'Market Average',
+            data: [2400, 2500, 2550, 2650, 2700, 2800],
+            borderColor: '#9A7209',
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
