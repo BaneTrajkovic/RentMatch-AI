@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "users.apps.UsersConfig",
     "chatbot.apps.ChatbotConfig",
+    "negotiation.apps.NegotiationConfig",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,6 +44,23 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+# For development (in-memory channel layer)
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
+# OR for production (Redis channel layer)
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#         },
+#     },
+# }
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 

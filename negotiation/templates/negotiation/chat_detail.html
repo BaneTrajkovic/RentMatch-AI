@@ -1,0 +1,201 @@
+{% extends 'negotiation/base.html' %}
+
+{% block title %}{{ chat.title }} - RentMatch.AI{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-houses me-2" style="color: var(--gold); font-size: 1.5rem;"></i>
+        <div>
+            <div class="chat-header-title">{{ chat.title }}</div>
+            <div class="small text-muted">
+                Property: {{ chat.property.title }} | 
+                {% if is_landlord %}
+                    Talking with: {{ chat.renter.username }} (Renter)
+                {% else %}
+                    Talking with: {{ chat.landlord.username }} (Landlord)
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="d-flex align-items-center">
+        <a href="{% url 'negotiation:chat_list' %}" class="btn btn-sm btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left"></i> Back to Chats
+        </a>
+    </div>
+</div>
+
+<div class="chat-container">
+    <div class="chat-messages" id="chat-messages">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message 
+                    {% if message.sender_type == 'bot' %}bot-message
+                    {% elif message.sender_type == 'landlord' %}
+                        {% if is_landlord %}user-message{% else %}landlord-message{% endif %}
+                    {% else %}
+                        {% if is_landlord %}renter-message{% else %}user-message{% endif %}
+                    {% endif %}">
+                    {{ message.content }}
+                    <div class="message-time">
+                        {% if message.sender_type == 'bot' %}
+                            AI Assistant
+                        {% else %}
+                            {{ message.user.username }}
+                        {% endif %}
+                        - {{ message.timestamp|date:"M d, Y H:i" }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="welcome-message">This is the beginning of your conversation about {{ chat.property.title }}. The AI Assistant will help facilitate your negotiation.</p>
+        {% endif %}
+    </div>
+
+    <div class="typing-indicator" id="typing-indicator">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <div class="chat-input-container">
+        <input type="text" class="chat-input" id="chat-input" placeholder="Type your message here..." />
+        <button class="send-button" id="send-button">
+            <i class="bi bi-send-fill"></i>
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        let botIsReplying = false;
+        
+        // Set up WebSocket connection
+        const chatId = {{ chat.id }};
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/property_chat/' + chatId + '/'
+        );
+
+        // Scroll to bottom function
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // WebSocket handlers
+        chatSocket.onopen = function(e) {
+            console.log('WebSocket connection established');
+            scrollToBottom();
+        };
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            
+            if (data.type === 'chat_message') {
+                // Handle regular chat messages
+                const message = data.message;
+                const messageDiv = $('<div></div>');
+                
+                // Determine message class
+                if (message.sender_type === 'bot') {
+                    messageDiv.addClass('message bot-message');
+                } else if (message.sender_type === 'landlord') {
+                    {% if is_landlord %}
+                        messageDiv.addClass('message user-message');
+                    {% else %}
+                        messageDiv.addClass('message landlord-message');
+                    {% endif %}
+                } else {
+                    {% if is_landlord %}
+                        messageDiv.addClass('message renter-message');
+                    {% else %}
+                        messageDiv.addClass('message user-message');
+                    {% endif %}
+                }
+                
+                messageDiv.text(message.content);
+                
+                // Add timestamp info
+                const timeDiv = $('<div class="message-time"></div>');
+                if (message.sender_type === 'bot') {
+                    timeDiv.text('AI Assistant - ' + new Date(message.timestamp).toLocaleString());
+                } else {
+                    timeDiv.text(message.sender + ' - ' + new Date(message.timestamp).toLocaleString());
+                }
+                messageDiv.append(timeDiv);
+                
+                // Hide typing indicator
+                $('#typing-indicator').hide();
+                
+                // Add message to chat
+                $('#chat-messages').append(messageDiv);
+                
+                // Scroll to bottom
+                scrollToBottom();
+                
+                // Reset states if this is a bot message (indicating the response cycle is complete)
+                if (message.sender_type === 'bot') {
+                    botIsReplying = false;
+                    $('#send-button i').removeClass('bi-hourglass-split').addClass('bi-send-fill');
+                    $('#chat-input').prop('disabled', false);
+                    $('#chat-input').focus();
+                }
+            } else if (data.type === 'chat_history') {
+                // Chat history is already loaded by Django template
+                scrollToBottom();
+            }
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('WebSocket connection closed');
+            
+            // Show error message
+            if (e.code !== 1000) {
+                const messageDiv = $('<div class="message bot-message"></div>');
+                messageDiv.text('Connection lost. Please reload the page to reconnect.');
+                $('#chat-messages').append(messageDiv);
+                scrollToBottom();
+            }
+        };
+
+        // Input handlers
+        $('#chat-input').focus();
+
+        $('#chat-input').on('keypress', function(e) {
+            if (e.key === 'Enter') {
+                $('#send-button').click();
+            }
+        });
+
+        $('#send-button').on('click', function() {
+            if (botIsReplying) return;
+            
+            const message = $('#chat-input').val().trim();
+            if (message === '') return;
+            
+            // Update UI state
+            botIsReplying = true;
+            $('#send-button i').removeClass('bi-send-fill').addClass('bi-hourglass-split');
+            $('#chat-input').prop('disabled', true);
+            
+            // Show typing indicator
+            $('#typing-indicator').show();
+            
+            // Send message via WebSocket - don't add to UI here
+            chatSocket.send(JSON.stringify({
+                'type': 'message',
+                'message': message
+            }));
+            
+            // Clear input
+            $('#chat-input').val('');
+            scrollToBottom();
+        });
+
+        // Scroll to bottom on page load
+        setTimeout(scrollToBottom, 100);
+    });
+</script>
+{% endblock %}

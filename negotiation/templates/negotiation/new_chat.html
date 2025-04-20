@@ -1,0 +1,178 @@
+{% extends 'negotiation/base.html' %}
+
+{% block title %}Start New Chat - RentMatch.AI{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-chat-left-text me-2" style="color: var(--gold); font-size: 1.5rem;"></i>
+        <div>
+            <div class="chat-header-title">Start a New Property Chat</div>
+            <div class="small text-muted">Connect with a {% if is_landlord %}renter{% else %}landlord{% endif %} about a
+                property</div>
+        </div>
+    </div>
+    <div class="d-flex align-items-center">
+        <a href="{% url 'negotiation:chat_list' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Chats
+        </a>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning bg-opacity-25">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-left-quote-fill me-2"></i>
+                        New Property Chat
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="newChatForm" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="propertySelect" class="form-label">Select Property</label>
+                            <select class="form-select form-select-lg" id="propertySelect" required>
+                                <option value="">-- Select a property --</option>
+                                {% for property in properties %}
+                                <option value="{{ property.id }}">{{ property.title }} - {{ property.address }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a property to discuss.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="userSelect" class="form-label">
+                                {% if is_landlord %}
+                                Select Renter
+                                {% else %}
+                                Select Landlord
+                                {% endif %}
+                            </label>
+                            <select class="form-select form-select-lg" id="userSelect" required>
+                                <option value="">-- Select a {% if is_landlord %}renter{% else %}landlord{% endif %} --
+                                </option>
+                                {% for user_obj in users %}
+                                <option value="{{ user_obj.id }}">{{ user_obj.username }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a {% if is_landlord %}renter{% else %}landlord{% endif %} to chat with.
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="initialMessage" class="form-label">Initial Message</label>
+                            <textarea class="form-control" id="initialMessage" rows="4" required
+                                placeholder="Type your first message to start the conversation..."></textarea>
+                            <div class="invalid-feedback">
+                                Please enter your initial message.
+                            </div>
+                            <div class="form-text">
+                                This message will start the conversation. The AI assistant will help facilitate the
+                                negotiation.
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="bi bi-chat-left-fill me-2"></i> Start Chat
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        // Form validation
+        const forms = document.querySelectorAll('.needs-validation');
+
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        // Handle form submission
+        $('#newChatForm').on('submit', function (e) {
+            e.preventDefault();
+
+            if (!this.checkValidity()) {
+                return;
+            }
+
+            const propertyId = $('#propertySelect').val();
+            const userId = $('#userSelect').val();
+            const initialMessage = $('#initialMessage').val().trim();
+
+            // Determine landlord and renter based on user role
+            let landlordId, renterId;
+            {% if is_landlord %}
+            landlordId = {{ user.id }
+        };
+        renterId = userId;
+        {% else %}
+        landlordId = userId;
+        renterId = {{ user.id }
+    };
+    {% endif %}
+
+    // Show loading state
+    $('#newChatForm button[type="submit"]').html('<i class="bi bi-hourglass-split me-2"></i> Connecting...').prop('disabled', true);
+
+    // Create WebSocket connection
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/property_chat/new/'
+    );
+
+    chatSocket.onopen = function (e) {
+        console.log('WebSocket connection established');
+
+        // Send initial data to create the chat
+        chatSocket.send(JSON.stringify({
+            'type': 'message',
+            'message': initialMessage,
+            'property_id': propertyId,
+            'landlord_id': landlordId,
+            'renter_id': renterId
+        }));
+    };
+
+    chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+
+        if (data.type === 'chat_created') {
+            // Redirect to the newly created chat
+            window.location.href = `/negotiation/chat/${data.chat.id}/`;
+        } else if (data.type === 'error') {
+            // Show error message
+            alert('Error: ' + data.message);
+            $('#newChatForm button[type="submit"]').html('<i class="bi bi-chat-left-fill me-2"></i> Start Chat').prop('disabled', false);
+        }
+    };
+
+    chatSocket.onclose = function (e) {
+        console.error('WebSocket connection closed unexpectedly');
+        $('#newChatForm button[type="submit"]').html('<i class="bi bi-chat-left-fill me-2"></i> Start Chat').prop('disabled', false);
+
+        if (e.code !== 1000) {
+            alert('Connection error. Please try again.');
+        }
+    };
+        });
+    });
+</script>
+{% endblock %}
