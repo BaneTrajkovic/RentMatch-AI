@@ -2,7 +2,7 @@ import json
 import re
 from channels.generic.websocket import WebsocketConsumer
 from .models import ChatbotConversation, ChatbotMessage
-from .helpers import get_chat_from_conversation, detect_profile_update_intent
+from .helpers import get_chat_from_conversation, detect_profile_update_intent, send_message_with_function_calling
 
 CONVERSATION_TITLE = """
 Analyze our complete conversation history and create a specific, contextual title that:
@@ -92,8 +92,7 @@ class ChatConsumer(WebsocketConsumer):
             return
         
         # Send to AI and get response for normal messages
-        response = self.chat.send_message(user_message)
-        response_text = response.text
+        response_text = send_message_with_function_calling(self.chat, user_message)
                 
         # Update title for new conversations
         if self.conversation.title == "New Conversation" and len(self.chat.get_history()) // 2 > 3:
