@@ -5,22 +5,22 @@
 {% block content %}
 <div class="content-header">
     <div class="d-flex align-items-center">
-        <i class="bi bi-houses me-2" style="color: var(--gold); font-size: 1.5rem;"></i>
+        <i class="bi bi-file-earmark-text me-2" style="color: var(--gold); font-size: 1.5rem;"></i>
         <div>
             <div class="chat-header-title">{{ chat.title }}</div>
             <div class="small text-muted">
                 Property: {{ chat.property.title }} | 
                 {% if is_landlord %}
-                    Talking with: {{ chat.renter.username }} (Renter)
+                    Applicant: {{ chat.renter.username }} (Renter)
                 {% else %}
-                    Talking with: {{ chat.landlord.username }} (Landlord)
+                    Property Owner: {{ chat.landlord.username }} (Landlord)
                 {% endif %}
             </div>
         </div>
     </div>
     <div class="d-flex align-items-center">
         <a href="{% url 'negotiation:chat_list' %}" class="btn btn-sm btn-outline-secondary me-2">
-            <i class="bi bi-arrow-left"></i> Back to Chats
+            <i class="bi bi-arrow-left"></i> Back to Applications
         </a>
     </div>
 </div>
@@ -48,7 +48,7 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p class="welcome-message">This is the beginning of your conversation about {{ chat.property.title }}. The AI Assistant will help facilitate your negotiation.</p>
+            <p class="welcome-message">This is the beginning of your application for {{ chat.property.title }}. The AI Assistant will help facilitate your application process.</p>
         {% endif %}
     </div>
 

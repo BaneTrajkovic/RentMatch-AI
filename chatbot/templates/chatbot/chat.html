@@ -403,16 +403,16 @@
             <a class="sidebar-logo-text" href="{% url 'users:welcome' %}">RentMatch.AI</a>
         </div>
         <div class="sidebar-menu mt-4">
-            <a href="#" class="menu-item">
+            <a href="{% url 'negotiation:property_list' %}" class="menu-item">
                 <i class="bi bi-house-door"></i>
                 <span class="menu-text">Properties</span>
             </a>
-            <!-- Replace your existing Chat menu item with this -->
+            <!-- AI Assistant menu item -->
             <a href="#" class="menu-item active" id="chat-menu-item">
                 <i class="bi bi-chat-dots-fill"></i>
-                <span class="menu-text">Chat</span>
+                <span class="menu-text">AI Assistant</span>
             </a>
-            <div class="submenu" id="chat-submenu">
+            <div class="submenu open" id="chat-submenu">
                 <!-- New Chat option always at the top -->
                 <a href="{% url 'chatbot:new-conversation' %}" class="submenu-item" id="new-chat-item">
                     <div class="chat-preview"><i class="bi bi-plus-circle me-1"></i>Start New Conversation</div>
@@ -430,6 +430,22 @@
                     {% endfor %}
                 </div>
             </div>
+            <!-- Applications menu item (replacing Property Chats) -->
+            <a href="{% url 'negotiation:chat_list' %}" class="menu-item" id="applications-menu-item">
+                <i class="bi bi-file-earmark-text-fill"></i>
+                <span class="menu-text">Applications</span>
+            </a>
+            <div class="submenu" id="applications-submenu">
+                <!-- Start New Application -->
+                <a href="{% url 'negotiation:new_chat' %}" class="submenu-item" id="new-application-item">
+                    <div class="chat-preview"><i class="bi bi-plus-circle me-1"></i>Start New Application</div>
+                </a>
+                
+                <!-- This is where existing applications will be loaded dynamically -->
+                <div id="applications-list">
+                    <!-- Applications will be added dynamically if available -->
+                </div>
+            </div>
             <a href="#" class="menu-item">
                 <i class="bi bi-search"></i>
                 <span class="menu-text">Search</span>
@@ -441,10 +457,6 @@
             <a href="#" class="menu-item">
                 <i class="bi bi-calendar-event"></i>
                 <span class="menu-text">Schedule</span>
-            </a>
-            <a href="#" class="menu-item">
-                <i class="bi bi-file-earmark-text"></i>
-                <span class="menu-text">Applications</span>
             </a>
             <a href="{% url 'users:profile' %}" class="menu-item">
                 <i class="bi bi-person"></i>
@@ -711,9 +723,22 @@
             $('#chat-menu-item').on('click', function (e) {
                 e.preventDefault();
                 $('#chat-submenu').toggleClass('open');
+                // Close the applications submenu when opening chat submenu
+                $('#applications-submenu').removeClass('open');
             });
 
+            // Applications menu handlers
+            $('#applications-menu-item').on('click', function (e) {
+                // Don't prevent default - allow navigation
+                // Just toggle the submenu
+                $('#applications-submenu').toggleClass('open');
+                // Close the chat submenu when opening applications submenu
+                $('#chat-submenu').removeClass('open');
+            });
+
+            // When mouse leaves the sidebar, collapse all submenus
             $('#sidebar').on('mouseleave', function () {
+                // Close all submenus when mouse leaves the sidebar
                 $('.submenu').removeClass('open');
             });
         });

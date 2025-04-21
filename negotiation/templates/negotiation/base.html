@@ -439,20 +439,25 @@
                 <i class="bi bi-chat-dots"></i>
                 <span class="menu-text">AI Assistant</span>
             </a>
-            <!-- Property Chat menu item -->
-            <a href="#" class="menu-item {% if 'negotiation' in request.path and request.resolver_match.url_name != 'property_list' %}active{% endif %}" id="property-chat-menu-item">
-                <i class="bi bi-chat-left-text-fill"></i>
-                <span class="menu-text">Property Chats</span>
+            <!-- Applications menu item (replacing Property Chat) -->
+            <a href="#" class="menu-item {% if 'negotiation' in request.path and request.resolver_match.url_name != 'property_list' %}active{% endif %}" id="applications-menu-item">
+                <i class="bi bi-file-earmark-text-fill"></i>
+                <span class="menu-text">Applications</span>
             </a>
-            <div class="submenu {% if 'negotiation' in request.path and request.resolver_match.url_name != 'property_list' %}open{% endif %}" id="property-chat-submenu">
+            <div class="submenu {% if 'negotiation' in request.path and request.resolver_match.url_name != 'property_list' %}open{% endif %}" id="applications-submenu">
                 <!-- New Chat option always at the top -->
-                <a href="{% url 'negotiation:new_chat' %}" class="submenu-item" id="new-chat-item">
-                    <div class="chat-preview"><i class="bi bi-plus-circle me-1"></i>Start New Chat</div>
+                <a href="{% url 'negotiation:new_chat' %}" class="submenu-item" id="new-application-item">
+                    <div class="chat-preview"><i class="bi bi-plus-circle me-1"></i>Start New Application</div>
+                </a>
+                
+                <!-- View All Applications -->
+                <a href="{% url 'negotiation:chat_list' %}" class="submenu-item" id="view-all-applications-item">
+                    <div class="chat-preview"><i class="bi bi-list-ul me-1"></i>View All Applications</div>
                 </a>
 
                 <!-- This is where existing chats will be loaded dynamically -->
-                <div id="chats-list">
-                    <!-- Chats will be added here via template or JavaScript -->
+                <div id="applications-list">
+                    <!-- Applications will be added here via template or JavaScript -->
                     {% for chat in user_chats %}
                     <a href="{% url 'negotiation:chat_detail' chat.id %}"
                         class="submenu-item {% if chat_id == chat.id %}active{% endif %}"
@@ -475,10 +480,6 @@
                 <span class="menu-text">Schedule</span>
             </a>
             <a href="#" class="menu-item">
-                <i class="bi bi-file-earmark-text"></i>
-                <span class="menu-text">Applications</span>
-            </a>
-            <a href="#" class="menu-item">
                 <i class="bi bi-gear"></i>
                 <span class="menu-text">Settings</span>
             </a>
@@ -496,20 +497,21 @@
     <script>
         $(document).ready(function () {
             // Sidebar menu handlers
-            $('#property-chat-menu-item').on('click', function (e) {
+            $('#applications-menu-item').on('click', function (e) {
                 e.preventDefault();
-                $('#property-chat-submenu').toggleClass('open');
+                // Toggle the submenu
+                $('#applications-submenu').toggleClass('open');
             });
 
+            // When mouse leaves the sidebar, collapse all submenus
             $('#sidebar').on('mouseleave', function () {
-                if (!$('#property-chat-submenu').hasClass('force-open')) {
-                    $('.submenu').removeClass('open');
-                }
+                // Close all submenus when mouse leaves the sidebar
+                $('.submenu').removeClass('open');
             });
             
             {% if 'negotiation' in request.path and request.resolver_match.url_name != 'property_list' %}
-                // Keep the submenu open on negotiation pages
-                $('#property-chat-submenu').addClass('force-open');
+                // Make sure applications submenu is initially open on negotiation pages
+                $('#applications-submenu').addClass('open');
             {% endif %}
         });
     </script>
