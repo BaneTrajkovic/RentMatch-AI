@@ -2,41 +2,570 @@
 
 {% block title %}Available Properties - RentMatch.AI{% endblock %}
 
+{% block extra_css %}
+<style>
+    .carousel-item {
+        height: 400px;
+    }
+    
+    .carousel-item img {
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .property-section {
+        margin-top: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .section-title {
+        color: var(--gold);
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .property-info {
+        padding: 1.5rem;
+    }
+    
+    .property-features {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .feature {
+        display: flex;
+        align-items: center;
+        background-color: var(--cream);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+    }
+    
+    .feature i {
+        color: var(--gold);
+        margin-right: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .property-price {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--gold);
+        margin-bottom: 1rem;
+    }
+    
+    .contact-btn {
+        background-color: var(--gold);
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 30px;
+        transition: all 0.3s;
+    }
+    
+    .contact-btn:hover {
+        background-color: var(--dark-gold);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        color: white;
+    }
+    
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+        height: 100%;
+        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.05);
+        border: none;
+        position: relative;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), 0 15px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--gold), var(--light-gold));
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    .card:hover:after {
+        opacity: 1;
+    }
+    
+    .property-image-container {
+        height: 280px;
+        overflow: hidden;
+        background-color: #f8f9fa;
+        position: relative;
+    }
+    
+    .property-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+    
+    .card:hover .property-image {
+        transform: scale(1.05);
+    }
+    
+    .property-photo-carousel {
+        height: 100%;
+    }
+    
+    .property-photo-carousel .carousel-inner, 
+    .property-photo-carousel .carousel-item {
+        height: 100%;
+    }
+    
+    .property-photo-carousel .carousel-control-prev,
+    .property-photo-carousel .carousel-control-next {
+        width: 10%;
+        opacity: 0.7;
+        background-color: rgba(0, 0, 0, 0.2);
+        height: 40px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-radius: 20px;
+    }
+    
+    .property-photo-carousel .carousel-control-prev {
+        left: 10px;
+    }
+    
+    .property-photo-carousel .carousel-control-next {
+        right: 10px;
+    }
+    
+    .photo-indicator {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        z-index: 10;
+    }
+    
+    .carousel-caption {
+        background-color: rgba(0, 0, 0, 0.7);
+        border-radius: 8px;
+        padding: 15px;
+        max-width: 80%;
+        margin: 0 auto;
+    }
+    
+    .property-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: var(--gold);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        z-index: 10;
+    }
+    
+    .property-days {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        z-index: 10;
+    }
+    
+    .property-address {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+    
+    .property-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: #888;
+        margin-top: 0.5rem;
+        border-top: 1px solid #eee;
+        padding-top: 0.5rem;
+    }
+    
+    .filters-bar {
+        background-color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    @media (max-width: 768px) {
+        .carousel-item {
+            height: 250px;
+        }
+        
+        .property-features {
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+        
+        .button-container {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .contact-btn, .btn-warning {
+            width: 100%;
+        }
+    }
+    
+    .content-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background-color: white;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .main-content {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .property-container {
+        flex-grow: 1;
+        overflow-y: auto;
+        height: calc(100vh - 80px);
+        padding: 1.5rem;
+        scrollbar-width: thin;
+        scrollbar-color: var(--light-gold) #f1f1f1;
+    }
+    
+    .property-container::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .property-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .property-container::-webkit-scrollbar-thumb {
+        background: var(--light-gold);
+        border-radius: 10px;
+    }
+    
+    .property-container::-webkit-scrollbar-thumb:hover {
+        background: var(--gold);
+    }
+    
+    .intro-message {
+        background-color: rgba(184, 134, 11, 0.1);
+        border-left: 4px solid var(--gold);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .intro-message p {
+        margin-bottom: 0;
+        color: var(--charcoal);
+    }
+    
+    .section-title {
+        color: var(--gold);
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--cream);
+        position: relative;
+    }
+    
+    .section-title:after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 80px;
+        height: 2px;
+        background-color: var(--gold);
+    }
+    
+    .section-title i {
+        margin-right: 0.5rem;
+    }
+    
+    .recommendation-badge {
+        background-color: var(--light-gold);
+        color: var(--charcoal);
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        margin-left: 0.8rem;
+        font-weight: normal;
+        vertical-align: middle;
+    }
+    
+    .property-section {
+        margin-bottom: 3.5rem;
+        position: relative;
+    }
+    
+    .carousel {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    
+    .carousel-inner {
+        border-radius: 12px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="content-header">
     <div class="d-flex align-items-center">
         <i class="bi bi-houses me-2" style="color: var(--gold); font-size: 1.5rem;"></i>
         <div>
             <div class="chat-header-title">Available Properties</div>
-            <div class="small text-muted">Start a conversation about a property</div>
+            <div class="small text-muted">Explore and find your perfect rental property</div>
         </div>
     </div>
     <div class="d-flex align-items-center">
         <a href="{% url 'negotiation:new_chat' %}" class="btn btn-sm btn-warning">
-            <i class="bi bi-chat-left-fill"></i> New Chat
+            <i class="bi bi-chat-left-fill"></i> New Application
         </a>
     </div>
 </div>
 
-<div class="container-fluid p-4">
+<div class="property-container">
     {% if properties %}
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            {% for property in properties %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm property-card">
-                        <img src="https://via.placeholder.com/400x200?text=Property+Image" class="property-image" alt="{{ property.title }}">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ property.title }}</h5>
-                            <p class="card-text">{{ property.address }}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <a href="{% url 'negotiation:new_chat' %}?property={{ property.id }}" class="btn btn-warning">
-                                    <i class="bi bi-chat-left-text"></i> Start Chat
-                                </a>
+        <!-- Introduction Message -->
+        <div class="intro-message">
+            <p><strong>Welcome to your personalized property recommendations!</strong> Based on your preferences and search history, we've curated a selection of properties that we believe would be perfect for your needs. Each property has been carefully selected to match your desired location, budget, and amenities.</p>
+        </div>
+    
+        <!-- Featured Properties Carousel -->
+        <div class="property-section">
+            <h3 class="section-title">
+                <i class="bi bi-star-fill"></i>
+                Featured Properties
+            </h3>
+            <div id="featuredPropertiesCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                <div class="carousel-indicators">
+                    {% for property in properties|slice:":5" %}
+                        {% if property.is_featured and property.price %}
+                        <button type="button" data-bs-target="#featuredPropertiesCarousel" 
+                                data-bs-slide-to="{{ forloop.counter0 }}" 
+                                {% if forloop.first %}class="active"{% endif %}
+                                aria-label="Slide {{ forloop.counter }}"></button>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="carousel-inner rounded shadow">
+                    {% for property in properties|slice:":5" %}
+                        {% if property.is_featured and property.price %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            {% if property.main_image_url %}
+                            <img src="{{ property.main_image_url }}" class="d-block w-100" alt="{{ property.address }}">
+                            {% else %}
+                            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=400&q=80" class="d-block w-100" alt="{{ property.address }}">
+                            {% endif %}
+                            <div class="carousel-caption d-md-block">
+                                <h5>{{ property.street_address }}</h5>
+                                <p>{{ property.city }}, {{ property.state }} {{ property.zipcode }}</p>
+                                <div class="d-flex gap-3 justify-content-center mb-2">
+                                    <span class="badge bg-light text-dark">{{ property.beds }} beds</span>
+                                    <span class="badge bg-light text-dark">{{ property.baths }} baths</span>
+                                    <span class="badge bg-light text-dark">{{ property.home_type }}</span>
+                                </div>
+                                <div class="d-flex gap-2 justify-content-center">
+                                    {% if property.has_air_conditioning %}
+                                    <span class="badge rounded-pill bg-light text-dark"><i class="bi bi-thermometer-snow text-primary"></i></span>
+                                    {% endif %}
+                                    {% if property.has_fireplace %}
+                                    <span class="badge rounded-pill bg-light text-dark"><i class="bi bi-fire text-danger"></i></span>
+                                    {% endif %}
+                                    {% if property.has_pool %}
+                                    <span class="badge rounded-pill bg-light text-dark"><i class="bi bi-water text-info"></i></span>
+                                    {% endif %}
+                                    {% if property.has_spa %}
+                                    <span class="badge rounded-pill bg-light text-dark"><i class="bi bi-tsunami text-info"></i></span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#featuredPropertiesCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#featuredPropertiesCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Recommended Properties (formerly All Available Properties) -->
+        <div class="property-section">
+            <h3 class="section-title">
+                <i class="bi bi-hand-thumbs-up"></i>
+                Recommended Properties
+                <span class="recommendation-badge">Tailored for you</span>
+            </h3>
+            <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
+                {% for property in properties|slice:":100" %}
+                    {% if property.price %}
+                    <div class="col" id="property-{{ property.zpid }}">
+                        <div class="card h-100 shadow-sm">
+                            <div class="property-image-container">
+                                {% if property.is_featured %}
+                                <div class="property-badge">Featured</div>
+                                {% endif %}
+                                
+                                {% if property.days_on_market %}
+                                <div class="property-days">{{ property.days_on_market }} days on market</div>
+                                {% endif %}
+                                
+                                <!-- Property photos carousel -->
+                                {% if property.carousel_photos %}
+                                <div id="property-carousel-{{ property.zpid }}" class="carousel slide property-photo-carousel" data-bs-ride="false" data-bs-interval="false" data-bs-touch="true">
+                                    <div class="carousel-inner">
+                                        {% if property.main_image_url %}
+                                        <div class="carousel-item active">
+                                            <img src="{{ property.main_image_url }}" class="property-image" alt="{{ property.address }}">
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% for photo in property.carousel_photos %}
+                                            {% if photo.url and photo.url != property.main_image_url %}
+                                            <div class="carousel-item {% if not property.main_image_url and forloop.first %}active{% endif %}">
+                                                <img src="{{ photo.url }}" class="property-image" alt="{{ property.address }} - Photo {{ forloop.counter }}">
+                                            </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    {% if property.carousel_photos|length > 1 or property.main_image_url and property.carousel_photos %}
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#property-carousel-{{ property.zpid }}" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#property-carousel-{{ property.zpid }}" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                    {% if property.main_image_url %}
+                                    <img src="{{ property.main_image_url }}" class="property-image" alt="{{ property.address }}">
+                                    {% else %}
+                                    <img src="https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=200&q=80" class="property-image" alt="{{ property.address }}">
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ property.price }}</h5>
+                                <div class="property-address">
+                                    <i class="bi bi-geo-alt text-muted me-1"></i>
+                                    {{ property.address }}
+                                </div>
+                                
+                                <div class="property-features">
+                                    <div class="feature">
+                                        <i class="bi bi-house-door"></i>
+                                        <span>{{ property.beds|default:"0" }} bd</span>
+                                    </div>
+                                    <div class="feature">
+                                        <i class="bi bi-droplet"></i>
+                                        <span>{{ property.baths|default:"0" }} ba</span>
+                                    </div>
+                                    {% if property.home_type %}
+                                    <div class="feature">
+                                        <i class="bi bi-building"></i>
+                                        <span>{{ property.home_type }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if property.has_air_conditioning or property.has_fireplace or property.has_pool or property.has_spa %}
+                                <div class="property-amenities mt-3">
+                                    <div class="d-flex align-items-center">
+                                        <small class="text-muted me-2">Amenities:</small>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            {% if property.has_air_conditioning %}
+                                            <span class="badge rounded-pill bg-light text-dark" title="Air Conditioning"><i class="bi bi-thermometer-snow me-1 text-primary"></i>A/C</span>
+                                            {% endif %}
+                                            
+                                            {% if property.has_fireplace %}
+                                            <span class="badge rounded-pill bg-light text-dark" title="Fireplace"><i class="bi bi-fire me-1 text-danger"></i>Fireplace</span>
+                                            {% endif %}
+                                            
+                                            {% if property.has_pool %}
+                                            <span class="badge rounded-pill bg-light text-dark" title="Swimming Pool"><i class="bi bi-water me-1 text-info"></i>Pool</span>
+                                            {% endif %}
+                                            
+                                            {% if property.has_spa %}
+                                            <span class="badge rounded-pill bg-light text-dark" title="Spa"><i class="bi bi-tsunami me-1 text-info"></i>Spa</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="d-grid mt-3">
+                                    <a href="{% url 'negotiation:new_chat' %}?property={{ property.zpid }}" class="btn btn-warning">
+                                        <i class="bi bi-chat-left-text"></i> Start Application
+                                    </a>
+                                </div>
+                                
+                                <div class="property-meta">
+                                    <span>{{ property.status_text }}</span>
+                                    {% if property.has_video or property.has_3d_model %}
+                                    <span>
+                                        {% if property.has_video %}
+                                        <i class="bi bi-camera-video" title="Video Tour Available"></i>
+                                        {% endif %}
+                                        {% if property.has_3d_model %}
+                                        <i class="bi bi-badge-3d" title="3D Tour Available"></i>
+                                        {% endif %}
+                                    </span>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
     {% else %}
         <div class="alert alert-info text-center p-5 shadow-sm">
@@ -46,4 +575,61 @@
         </div>
     {% endif %}
 </div>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Initialize featured carousel with faster autoplay
+        $('#featuredPropertiesCarousel').carousel({
+            interval: 3000
+        });
+        
+        // Initialize all property photo carousels
+        $('.property-photo-carousel').each(function() {
+            // Add event listeners to prevent bootstrap carousel from affecting parent carousels
+            $(this).on('slide.bs.carousel', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Track photo position
+            const carouselId = $(this).attr('id');
+            const totalPhotos = $(this).find('.carousel-item').length;
+            
+            // Add photo counter indicator
+            $(this).append(`<div class="photo-indicator"><span id="${carouselId}-current">1</span>/${totalPhotos}</div>`);
+            
+            // Update counter on slide
+            $(this).on('slid.bs.carousel', function() {
+                const activeIndex = $(this).find('.carousel-item.active').index() + 1;
+                $(`#${carouselId}-current`).text(activeIndex);
+            });
+        });
+        
+        // Add hover effect to show controls
+        $('.property-image-container').hover(
+            function() {
+                $(this).find('.carousel-control-prev, .carousel-control-next').css('opacity', '0.7');
+            },
+            function() {
+                $(this).find('.carousel-control-prev, .carousel-control-next').css('opacity', '0');
+            }
+        );
+        
+        // Apply 3D-like shadow effect on card hover
+        $('.card').hover(
+            function() {
+                const card = $(this);
+                card.css('transform', 'translateY(-8px) rotateX(2deg)');
+            },
+            function() {
+                const card = $(this);
+                card.css('transform', 'translateY(0) rotateX(0)');
+            }
+        );
+        
+        // Ensure smooth scrolling
+        $('.property-container').css('scroll-behavior', 'smooth');
+    });
+</script>
+{% endblock %}
 {% endblock %}
