@@ -2,7 +2,7 @@ import json
 import re
 from channels.generic.websocket import WebsocketConsumer
 from .models import ChatbotConversation, ChatbotMessage
-from .helpers import get_chat_from_conversation, generate_lease_document, detect_profile_update_intent
+from .helpers import get_chat_from_conversation, detect_profile_update_intent
 
 CONVERSATION_TITLE = """
 Analyze our complete conversation history and create a specific, contextual title that:
@@ -94,35 +94,7 @@ class ChatConsumer(WebsocketConsumer):
         # Send to AI and get response for normal messages
         response = self.chat.send_message(user_message)
         response_text = response.text
-        
-        # Check for lease generation tag
-        lease_match = re.search(r'\[GENERATE_LEASE\](.*?)(?=\[|$)', response_text, re.DOTALL)
-        if lease_match:
-            try:
-                # Extract property data from the response
-                property_data_str = lease_match.group(1).strip()
                 
-                # Remove the lease generation tag from the response
-                clean_response = response_text.replace(lease_match.group(0), '')
-                
-                # Parse property data - this assumes the model will format it as a JSON object
-                try:
-                    # Try to parse as JSON
-                    property_data = json.loads(property_data_str)
-                except json.JSONDecodeError:
-                    # If not valid JSON, use as text
-                    property_data = {"description": property_data_str}
-                
-                # Generate the lease document
-                lease_document = generate_lease_document(self.scope["user"], property_data)
-                
-                # Update the response with the lease document
-                response_text = f"{clean_response}\n\n**LEASE DOCUMENT GENERATED:**\n\n{lease_document}"
-                
-            except Exception as e:
-                # If there's an error, add it to the response
-                response_text = f"{response_text}\n\nThere was an error generating the lease document: {str(e)}"
-        
         # Update title for new conversations
         if self.conversation.title == "New Conversation" and len(self.chat.get_history()) // 2 > 3:
             title_response = self.chat.send_message(CONVERSATION_TITLE)

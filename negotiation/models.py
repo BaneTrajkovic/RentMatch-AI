@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 import json
+from django.db.models import Q
 
 class Property(models.Model):
     """Property model based on Zillow-like rental property data"""
@@ -127,6 +128,89 @@ class Property(models.Model):
             property_data['has_pool'] = facts.get('hasPool', False)
             
         return cls(**property_data)
+    
+    @classmethod
+    def search_properties(cls, 
+                          address_keywords=None, 
+                          min_price=None, 
+                          max_price=None, 
+                          home_type=None, 
+                          beds=None, 
+                          baths=None, 
+                          amenities=None):
+        """
+        Search and filter properties based on multiple criteria.
+        
+        Args:
+            address_keywords (list): List of strings to search in address fields (case-insensitive)
+                                     All keywords must be present in at least one of the address fields
+            min_price (float): Minimum price for filtering
+            max_price (float): Maximum price for filtering
+            home_type (str): Type of property (Apartment, House, etc.)
+            beds (int): Number of bedrooms
+            baths (float): Number of bathrooms
+            amenities (list): List of amenities to filter by (fireplace, pool, spa, air_conditioning)
+            
+        Returns:
+            QuerySet of Property objects matching the search criteria
+        """
+        # Start with all properties
+        query = cls.objects.all()
+        
+        # Filter by address keywords
+        if address_keywords and isinstance(address_keywords, list):
+            # Initialize with all properties
+            address_filtered_query = query
+            
+            for keyword in address_keywords:
+                # For each keyword, create a filter condition across all address fields
+                keyword_q = (
+                    Q(address__icontains=keyword) | 
+                    Q(street_address__icontains=keyword) |
+                    Q(city__icontains=keyword) |
+                    Q(state__icontains=keyword) |
+                    Q(zipcode__icontains=keyword)
+                )
+                # Filter the query to match this keyword
+                address_filtered_query = address_filtered_query.filter(keyword_q)
+            
+            # Update the main query with the address-filtered query
+            query = address_filtered_query
+        
+        # Filter by price range
+        if min_price is not None:
+            query = query.filter(unformatted_price__gte=min_price)
+        if max_price is not None:
+            query = query.filter(unformatted_price__lte=max_price)
+        
+        # Filter by property type
+        if home_type:
+            query = query.filter(home_type__iexact=home_type)
+        
+        # Filter by beds
+        if beds is not None:
+            query = query.filter(beds=beds)
+        
+        # Filter by baths
+        if baths is not None:
+            query = query.filter(baths=baths)
+        
+        # Filter by amenities
+        if amenities and isinstance(amenities, list):
+            amenity_mapping = {
+                'fireplace': 'has_fireplace',
+                'pool': 'has_pool',
+                'spa': 'has_spa',
+                'air_conditioning': 'has_air_conditioning'
+            }
+            
+            for amenity in amenities:
+                amenity_lower = amenity.lower()
+                if amenity_lower in amenity_mapping:
+                    filter_kwargs = {amenity_mapping[amenity_lower]: True}
+                    query = query.filter(**filter_kwargs)
+        
+        return query
 
 class PropertyChat(models.Model):
     """Chat between landlord and renter about a specific property"""

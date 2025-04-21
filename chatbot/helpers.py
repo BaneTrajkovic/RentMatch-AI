@@ -1,10 +1,11 @@
 from google import genai
 from google.genai import types
-from typing import Optional
+from typing import Optional, List, Dict, Any, Union
 from .models import ChatbotConversation, ChatbotMessage
 import constants
 from django.contrib.auth.models import User
 from users.models import RenterProfile
+from negotiation.models import Property
 
 SYSTEM_INSTRUCTION = """
 You are RentMatch.AI, a friendly and knowledgeable rental assistant specializing in NYC housing. Your role is to help users find their ideal apartment through natural conversation.
@@ -249,3 +250,68 @@ def detect_profile_update_intent(message: str) -> bool:
             return True
     
     return False
+
+def search_properties(
+    address_keywords: List[str] = None,
+    min_price: float = None,
+    max_price: float = None,
+    home_type: str = None,
+    beds: int = None,
+    baths: float = None,
+    amenities: List[str] = None
+) -> List[Dict[str, Any]]:
+    """
+    Search properties based on multiple criteria and return them as a list of dictionaries.
+    
+    Args:
+        address_keywords: List of strings to search in address fields (case-insensitive)
+                         Properties must contain ALL keywords across their address fields
+        min_price: Minimum price for filtering
+        max_price: Maximum price for filtering
+        home_type: Type of property (Apartment, House, etc.)
+        beds: Number of bedrooms
+        baths: Number of bathrooms
+        amenities: List of amenities to filter by (fireplace, pool, spa, air_conditioning)
+        
+    Returns:
+        List of dictionaries containing property data
+    """
+    # Use the Property model's search method to get the QuerySet
+    properties = Property.search_properties(
+        address_keywords=address_keywords,
+        min_price=min_price,
+        max_price=max_price,
+        home_type=home_type,
+        beds=beds,
+        baths=baths,
+        amenities=amenities
+    )
+    
+    # Convert QuerySet to a list of dictionaries
+    result = []
+    for prop in properties:
+        property_dict = {
+            'zpid': prop.zpid,
+            'address': prop.address,
+            'street_address': prop.street_address,
+            'city': prop.city,
+            'state': prop.state,
+            'zipcode': prop.zipcode,
+            'price': prop.price,
+            'unformatted_price': float(prop.unformatted_price) if prop.unformatted_price else None,
+            'beds': prop.beds,
+            'baths': prop.baths,
+            'home_type': prop.home_type,
+            'amenities': {
+                'fireplace': prop.has_fireplace,
+                'pool': prop.has_pool,
+                'spa': prop.has_spa,
+                'air_conditioning': prop.has_air_conditioning
+            },
+            'main_image_url': prop.main_image_url,
+            'detail_url': prop.detail_url
+        }
+        
+        result.append(property_dict)
+    
+    return result
