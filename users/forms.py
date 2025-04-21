@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Field, Div, HTML
+from .models import RenterProfile
 
 class UserRegistrationForm(UserCreationForm):
 
@@ -62,3 +63,19 @@ class UserLoginForm(AuthenticationForm):
             Div(Submit('submit', 'Log In', css_class='btn btn-gold btn-lg py-3 w-100'), css_class='d-grid mb-4'),
             HTML('<div class="text-center"><p class="mb-0">Already have an account? <a href="#" class="link-gold">Log In</a></p></div>')
         )
+
+class RenterProfileForm(forms.ModelForm):
+    class Meta:
+        model = RenterProfile
+        exclude = ['user', 'created_at', 'updated_at']
+        widgets = {
+            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+            'employment_start_date': forms.DateInput(attrs={'type': 'date'}),
+            'move_in_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super(RenterProfileForm, self).__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if field_name not in ['date_of_birth', 'employment_start_date', 'move_in_date']:
+                field.widget.attrs.update({'class': 'form-control'})

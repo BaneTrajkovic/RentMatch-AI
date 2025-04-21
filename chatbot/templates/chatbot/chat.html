@@ -446,6 +446,10 @@
                 <i class="bi bi-file-earmark-text"></i>
                 <span class="menu-text">Applications</span>
             </a>
+            <a href="{% url 'users:profile' %}" class="menu-item">
+                <i class="bi bi-person"></i>
+                <span class="menu-text">My Profile</span>
+            </a>
             <a href="#" class="menu-item">
                 <i class="bi bi-gear"></i>
                 <span class="menu-text">Settings</span>
@@ -558,7 +562,14 @@
 
                     // Handle regular chat messages
                     const messageDiv = $('<div class="message bot-message"></div>');
-                    messageDiv.html(marked.parse(data.message));
+                    
+                    // Process markdown and convert profile page links to actual links
+                    const processedMessage = marked.parse(data.message).replace(
+                        /\[([^\]]+)\]\(\/users\/profile\/edit\/\)/g, 
+                        '<a href="/users/profile/edit/" class="profile-link">$1</a>'
+                    );
+                    
+                    messageDiv.html(processedMessage);
 
                     // Add timestamp
                     const timeDiv = $('<div class="message-time">Just now</div>');
@@ -569,6 +580,12 @@
 
                     // Add message to chat
                     $('#chat-messages').append(messageDiv);
+                    
+                    // Add click handler for any profile links
+                    $('.profile-link').off('click').on('click', function(e) {
+                        e.preventDefault();
+                        window.location.href = $(this).attr('href');
+                    });
 
                     // Scroll to bottom
                     scrollToBottom();

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile | RentMatch.AI</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --gold: #B8860B;
+            --dark-gold: #9A7209;
+            --charcoal: #333333;
+            --cream: #FFF8E6;
+            --light-gold: #DFC98A;
+            --off-white: #F9F5EB;
+            --bright-gold: #FFD700;
+        }
+
+        body {
+            background-color: var(--off-white);
+            color: var(--charcoal);
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            background-color: var(--gold);
+            height: 100vh;
+            width: 80px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar:hover {
+            width: 280px;
+        }
+
+        .sidebar-header {
+            color: white;
+            padding: 1.5rem 1rem;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .sidebar:hover .sidebar-header {
+            justify-content: flex-start;
+        }
+
+        .sidebar-icon {
+            font-size: 2rem;
+            transition: all 0.3s;
+        }
+
+        .sidebar:hover .sidebar-icon {
+            transform: scale(0);
+            width: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .sidebar-logo-text {
+            color: white;
+            font-size: 1.4rem;
+            font-weight: bold;
+            position: absolute;
+            left: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .sidebar:hover .sidebar-logo-text {
+            opacity: 1;
+        }
+
+        .menu-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background-color: var(--dark-gold);
+            border-left-color: white;
+            color: white;
+        }
+
+        .menu-item i {
+            font-size: 1.25rem;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        .menu-text {
+            margin-left: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .sidebar:hover .menu-text {
+            opacity: 1;
+        }
+
+        /* Main content area */
+        .main-content {
+            margin-left: 80px;
+            transition: all 0.3s;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gold);
+            margin: 0;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background-color: var(--light-gold);
+            color: var(--charcoal);
+            font-weight: 600;
+            padding: 0.8rem 1.25rem;
+            border-bottom: none;
+        }
+
+        .btn-primary {
+            background-color: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-gold);
+            border-color: var(--dark-gold);
+        }
+
+        .btn-secondary {
+            color: var(--charcoal);
+            background-color: #f0f0f0;
+            border-color: #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            color: var(--charcoal);
+            background-color: #e0e0e0;
+            border-color: #d0d0d0;
+        }
+
+        /* Form styles */
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            color: var(--charcoal);
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            border: 1px solid #ddd;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 0.25rem rgba(184, 134, 11, 0.25);
+        }
+        
+        /* Additional form field enhancements */
+        .form-control::placeholder {
+            color: #aaa;
+            opacity: 0.7;
+        }
+        
+        .form-control:hover {
+            border-color: #bbb;
+        }
+        
+        /* Style date inputs */
+        input[type="date"] {
+            padding: 0.5rem 1rem;
+        }
+        
+        /* Form field group */
+        .field-group {
+            margin-bottom: 1rem;
+        }
+        
+        .field-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 500;
+            color: var(--charcoal);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .sidebar:hover {
+                width: 240px;
+            }
+
+            .main-content {
+                margin-left: 60px;
+            }
+        }
+
+        /* Submenu styles */
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background-color: rgba(0, 0, 0, 0.15);
+        }
+
+        .submenu.open {
+            max-height: 300px;
+        }
+
+        .submenu-item {
+            padding: 0.5rem 1rem 0.5rem 3rem;
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .submenu-item:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-house-heart-fill sidebar-icon"></i>
+            <a class="sidebar-logo-text" href="{% url 'users:welcome' %}">RentMatch.AI</a>
+        </div>
+        <div class="sidebar-menu mt-4">
+            <a href="#" class="menu-item">
+                <i class="bi bi-house-door"></i>
+                <span class="menu-text">Properties</span>
+            </a>
+            <a href="{% url 'chatbot:new-conversation' %}" class="menu-item">
+                <i class="bi bi-chat-dots-fill"></i>
+                <span class="menu-text">Chat</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="bi bi-search"></i>
+                <span class="menu-text">Search</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="bi bi-star"></i>
+                <span class="menu-text">Favorites</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="bi bi-calendar-event"></i>
+                <span class="menu-text">Schedule</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="bi bi-file-earmark-text"></i>
+                <span class="menu-text">Applications</span>
+            </a>
+            <a href="{% url 'users:profile' %}" class="menu-item active">
+                <i class="bi bi-person"></i>
+                <span class="menu-text">My Profile</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="bi bi-gear"></i>
+                <span class="menu-text">Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-person-circle me-2" style="color: var(--gold); font-size: 1.5rem;"></i>
+                <h1 class="page-title">Edit Profile</h1>
+            </div>
+            <a href="{% url 'users:profile' %}" class="btn btn-secondary">
+                <i class="bi bi-eye me-2"></i>View Profile
+            </a>
+        </div>
+
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Add placeholders to form fields
+                    document.querySelector('[name="first_name"]').placeholder = "Enter your first name";
+                    document.querySelector('[name="last_name"]').placeholder = "Enter your last name";
+                    document.querySelector('[name="phone_number"]').placeholder = "Enter your phone number";
+                    
+                    document.querySelector('[name="current_address"]').placeholder = "Enter your street address";
+                    document.querySelector('[name="current_city"]').placeholder = "Enter your city";
+                    document.querySelector('[name="current_state"]').placeholder = "Enter your state";
+                    document.querySelector('[name="current_zip_code"]').placeholder = "Enter your ZIP code";
+                    
+                    document.querySelector('[name="employer_name"]').placeholder = "Enter your employer's name";
+                    document.querySelector('[name="job_title"]').placeholder = "Enter your job title";
+                    document.querySelector('[name="monthly_income"]').placeholder = "Enter your monthly income";
+                    
+                    document.querySelector('[name="ssn_last_four"]').placeholder = "Last 4 digits of SSN";
+                    document.querySelector('[name="emergency_contact_name"]').placeholder = "Emergency contact name";
+                    document.querySelector('[name="emergency_contact_phone"]').placeholder = "Emergency contact phone";
+                    
+                    document.querySelector('[name="lease_term_preference"]').placeholder = "e.g., 6 months, 12 months";
+                    
+                    // Add field-group class to all form fields parent divs
+                    const formFields = document.querySelectorAll('.form-control');
+                    formFields.forEach(field => {
+                        let parent = field.parentElement;
+                        parent.classList.add('field-group');
+                    });
+                });
+            </script>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-person me-2"></i>Personal Information
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_first_name">First Name</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_last_name">Last Name</label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_date_of_birth">Date of Birth</label>
+                            {{ form.date_of_birth }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_phone_number">Phone Number</label>
+                            {{ form.phone_number }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-house me-2"></i>Current Address
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="id_current_address">Street Address</label>
+                            {{ form.current_address }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_current_city">City</label>
+                            {{ form.current_city }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_current_state">State</label>
+                            {{ form.current_state }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_current_zip_code">ZIP Code</label>
+                            {{ form.current_zip_code }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-briefcase me-2"></i>Employment Information
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_employer_name">Employer Name</label>
+                            {{ form.employer_name }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_job_title">Job Title</label>
+                            {{ form.job_title }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_monthly_income">Monthly Income</label>
+                            {{ form.monthly_income }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_employment_start_date">Employment Start Date</label>
+                            {{ form.employment_start_date }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-info-circle me-2"></i>Additional Information
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="id_ssn_last_four">Last 4 digits of SSN</label>
+                            {{ form.ssn_last_four }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_emergency_contact_name">Emergency Contact Name</label>
+                            {{ form.emergency_contact_name }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_emergency_contact_phone">Emergency Contact Phone</label>
+                            {{ form.emergency_contact_phone }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-calendar-check me-2"></i>Lease Preferences
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_lease_term_preference">Lease Term Preference</label>
+                            {{ form.lease_term_preference }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_move_in_date">Preferred Move-in Date</label>
+                            {{ form.move_in_date }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button class="btn btn-primary btn-lg" type="submit">
+                    <i class="bi bi-save me-2"></i>Save Profile
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap 5 JS with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html> 
