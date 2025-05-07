@@ -6,7 +6,7 @@ from .forms import UserRegistrationForm, UserLoginForm, RenterProfileForm
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.contrib.auth import logout
 from django.contrib import messages
 from django.urls import reverse_lazy
 from .models import RenterProfile
@@ -57,6 +57,13 @@ class LoginUserView(LoginView):
             RenterProfile.objects.create(user=self.request.user)
         
         return response
+
+
+def logout_view(request):
+    # Regardless of method, logout the user
+    logout(request)
+    messages.success(request, "You have been logged out successfully.")
+    return redirect('users:login')
     
 class ChooseUserRoleView(LoginRequiredMixin, TemplateView):
 

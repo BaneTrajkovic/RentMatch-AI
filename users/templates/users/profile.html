@@ -221,6 +221,18 @@
         .submenu-item:hover {
             background-color: rgba(0, 0, 0, 0.1);
         }
+
+        .sidebar-menu {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 110px);
+        }
+
+        /* Make the spacer push the logout to bottom */
+        .sidebar-spacer {
+            flex-grow: 1;
+        }
     </style>
 </head>
 
@@ -248,6 +260,14 @@
                 <i class="bi bi-person"></i>
                 <span class="menu-text">My Profile</span>
             </a>
+            <div class="sidebar-spacer"></div>
+            <form action="{% url 'users:logout' %}" method="post" class="menu-item" style="border: none; background: transparent; padding: 0;">
+                {% csrf_token %}
+                <button type="submit" class="menu-item border-0 bg-transparent w-100 text-start" onclick="return confirm('Are you sure you want to logout?')">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span class="menu-text">Logout</span>
+                </button>
+            </form>
         </div>
     </div>
 
@@ -258,9 +278,17 @@
                 <i class="bi bi-person-circle me-2" style="color: var(--gold); font-size: 1.5rem;"></i>
                 <h1 class="page-title">Profile</h1>
             </div>
-            <a href="{% url 'users:profile_edit' %}" class="btn btn-primary">
-                <i class="bi bi-pencil me-2"></i>Edit Profile
-            </a>
+            <div class="d-flex">
+                <a href="{% url 'users:profile_edit' %}" class="btn btn-primary me-2">
+                    <i class="bi bi-pencil me-2"></i>Edit Profile
+                </a>
+                <form action="{% url 'users:logout' %}" method="post" class="d-inline" id="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to logout?')">
+                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                    </button>
+                </form>
+            </div>
         </div>
 
         <div class="row">

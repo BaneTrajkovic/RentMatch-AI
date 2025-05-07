@@ -18,11 +18,13 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 from django.views.generic import TemplateView
+from django.contrib.auth.views import LogoutView
 
 app_name = "users"
 urlpatterns = [
     path("register/", views.CreateUserView.as_view(), name="register"),
     path("login/", views.LoginUserView.as_view(), name="login"),
+    path("logout/", views.logout_view, name="logout"),
     path("welcome/", views.ChooseUserRoleView.as_view(), name="welcome"),
     path("profile/", views.RenterProfileView.as_view(), name="profile"),
     path("profile/edit/", views.RenterProfileUpdateView.as_view(), name="profile_edit"),
