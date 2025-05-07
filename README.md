@@ -82,17 +82,12 @@ python manage.py runserver
 ## User Credentials
 
 ### Renter Access
-- **Username**: Same as password (e.g., `testing1`/`testing1`)
-- Multiple test renter accounts are available (testing1, testing2, etc.)
+- **Username**: `renterMVP`
+- **Password**: `rentmatchMVP1`
 
 ### Landlord Access
 - **Username**: `landlordMVP`
 - **Password**: `landlordMVP`
-
-### Admin Access
-- Access the Django admin at `/admin`
-- **Username**: `admin`
-- **Password**: `admin`
 
 ## Core Features
 
@@ -162,11 +157,10 @@ The AI-powered lease negotiation system is the core innovative feature:
 ### Landlord Experience
 
 1. **Login**: Use landlord credentials (landlordMVP/landlordMVP)
-2. **Manage listings**: View, add, or edit property listings
-3. **Review applications**: See all applications submitted by interested renters
-4. **Communicate with applicants**: Message renters directly about their applications
-5. **Negotiate terms**: Use the AI-assisted platform to finalize lease details
-6. **Finalize leases**: Complete the process with digital signatures
+2. **Review applications**: See all applications submitted by interested renters
+3. **Communicate with applicants**: Message renters directly about their applications
+4. **Negotiate terms**: Use the AI-assisted platform to finalize lease details
+5. **Finalize leases**: Complete the process with digital signatures
 
 ## Technical Architecture
 
