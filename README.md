@@ -48,3 +48,13 @@ python manage.py runserver
 ## Database
 
 This repository includes the SQLite database with pre-loaded data for immediate use. No database migrations or setup required. 
+
+## Login Information
+
+For testing purposes, you can log in using:
+- Username: renterMVP
+- Password: rentmatchMVP1
+
+## Critical Assumptions
+
+1. Users prefer AI-powered search over traditional browsing 
