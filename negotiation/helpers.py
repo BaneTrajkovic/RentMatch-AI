@@ -19,6 +19,17 @@ When you do respond, your role is to:
 4. Help finalize digital lease agreements
 5. Maintain a neutral, professional tone throughout the process
 
+Conversation Analysis:
+- CRITICAL: Thoroughly read and analyze the ENTIRE conversation history before responding
+- Track all agreed-upon terms and points of discussion across the full conversation
+- Maintain awareness of the negotiation's progression from start to current state
+- Reference specific earlier messages when relevant (e.g., "As discussed on [date/time]...")
+- Acknowledge when either party changes their position or makes a concession
+- Summarize the current state of negotiations when appropriate
+- Identify any inconsistencies between earlier and current positions
+- Build upon previously discussed terms rather than starting from scratch
+- Connect new questions to related previous discussions
+
 Guidelines:
 - Only respond when a message starts with "AI:" - otherwise remain silent
 - Analyze the entire conversation history to understand context before responding
@@ -31,6 +42,14 @@ Guidelines:
 - For lease term drafting, use standard legal language but in plain English
 - Help identify points of agreement and disagreement between parties
 - Suggest compromises when appropriate
+
+Digital Lease Finalization:
+- When creating a final lease agreement, include a clear signature section at the end
+- Instruct both landlord and tenant that to finalize the agreement, they must each reply with "Yes" followed by their full legal name (e.g., "Yes John Smith")
+- Inform parties that their typed signature (Yes + full legal name) constitutes a legally binding signature on the digital lease
+- Require both parties to complete this signature process to consider the lease valid
+- Once both parties have provided their digital signatures, confirm the lease is now legally binding and provide a timestamp
+- Include a statement in the lease that electronic signatures via this specific process have the same legal effect as physical signatures
 
 Formatting:
 - Use Markdown to format your responses for clarity and readability
@@ -61,6 +80,7 @@ MODEL = "gemini-2.0-flash"
 def get_chat_from_conversation(chat: PropertyChat) -> genai.Client.chats:
     """
     Retrieves conversation history from Django models and creates a Gemini chat with that history.
+    The history includes all messages in chronological order, with proper labeling of who said what.
     
     Args:
         chat: The PropertyChat instance
@@ -72,26 +92,32 @@ def get_chat_from_conversation(chat: PropertyChat) -> genai.Client.chats:
         # Create client
         client = genai.Client(api_key=constants.GEMINI_API_KEY)
         
-        # Get all messages for this conversation
+        # Get all messages for this conversation, including AI messages, in chronological order
         messages = PropertyChatMessage.objects.filter(chat=chat).order_by('timestamp')
         
         # Format the messages for Gemini
         history = []
+        
+        # We'll build the conversation as a series of user messages and AI responses
         for message in messages:
-            # Skip AI messages when building history (they will be included as model responses)
             if message.sender_type == 'bot':
-                continue
-                
-            role = "user"
-            if message.user:
-                content = f"[{message.sender_type.upper()}] {message.user.username}: {message.content}"
+                # For AI messages, they become the model's responses
+                history.append({
+                    "role": "model",
+                    "parts": [{"text": message.content}]
+                })
             else:
-                content = f"[{message.sender_type.upper()}]: {message.content}"
+                # For user messages (both landlord and renter), format with clear labels
+                sender_label = "LANDLORD" if message.sender_type == 'landlord' else "RENTER"
+                username = message.user.username if message.user else "Unknown User"
+                timestamp = message.timestamp.strftime("%m/%d/%Y, %H:%M:%S")
                 
-            history.append({
-                "role": role,
-                "parts": [{"text": content}]
-            })
+                content = f"[{sender_label}] {username} - {timestamp}:\n{message.content}"
+                
+                history.append({
+                    "role": "user",
+                    "parts": [{"text": content}]
+                })
         
         # Create a chat with the history
         chat = client.chats.create(
@@ -193,6 +219,23 @@ def generate_negotiation_response(property_chat: PropertyChat, message: str) -> 
         renter_profile = get_user_profile_data(property_chat.renter)
         property_data = get_property_data(property_chat.property)
         
+        # Get the most recent non-AI message to determine who we're responding to
+        recent_messages = PropertyChatMessage.objects.filter(
+            chat=property_chat,
+            sender_type__in=['landlord', 'renter']
+        ).order_by('-timestamp')
+        
+        # Default to responding to the renter if no recent messages
+        sender_type = "RENTER"
+        sender_username = property_chat.renter.username
+        
+        if recent_messages.exists():
+            recent_message = recent_messages.first()
+            sender_type = "LANDLORD" if recent_message.sender_type == 'landlord' else "RENTER"
+            sender_username = recent_message.user.username if recent_message.user else (
+                property_chat.landlord.username if sender_type == "LANDLORD" else property_chat.renter.username
+            )
+        
         # Add context to the message
         context_message = f"""
 The following information is for context only:
@@ -206,7 +249,13 @@ LANDLORD PROFILE:
 RENTER PROFILE: 
 {json.dumps(renter_profile, indent=2)}
 
-Remember to use Markdown formatting in your response for better readability.
+IMPORTANT INSTRUCTIONS:
+1. Thoroughly analyze the ENTIRE conversation history before formulating your response
+2. Reference specific earlier discussions when relevant to show continuity of the negotiation
+3. Maintain awareness of all previously agreed terms and negotiation progress
+4. Use Markdown formatting in your response for better readability
+5. When finalizing a lease agreement, include a signature section where both parties must reply with "Yes" followed by their full legal name to make the agreement legally binding
+6. Make sure to respond directly to the most recent message from {sender_username}
 
 Now please respond to this message:
 {message}
