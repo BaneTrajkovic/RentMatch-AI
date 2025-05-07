@@ -71,17 +71,14 @@ REDIS_URL=your_redis_url
 3. Rename the file to `constants.py`
 
 **Option 2: Request an API key**
-Email bt2639@columbia.edu to request a Gemini API key for this project.
+1. Email bt2639@columbia.edu to request a Gemini API key for this project
+2. You'll receive the API key via email
+3. Copy the received API key to the `constants.py.example` file
+4. Rename the file to `constants.py`
 
 ### 5. Database Setup
 
 The project includes a pre-configured SQLite3 database with sample data already loaded. No database migration or setup is required.
-
-If you want to reset the database or start fresh, you can run:
-
-```bash
-python manage.py flush  # This will clear all data but keep the structure
-```
 
 ### 6. Run the Development Server
 
