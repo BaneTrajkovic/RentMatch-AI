@@ -24,11 +24,10 @@ RentMatch.AI is an innovative rental property platform that leverages AI to stre
 
 ## System Requirements
 
-- Python 3.8+
-- Django 5.0+
+- Python 3.13.3
+- Django 5.2
 - SQLite3 (already included)
 - Redis (for WebSocket support)
-- Node.js and npm (for front-end assets)
 - Google Gemini Pro API Key
 
 ## Installation & Setup
@@ -51,7 +50,6 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 ```bash
 pip install -r requirements.txt
-npm install  # If using Node.js for front-end assets
 ```
 
 ### 4. Configure Environment Variables
@@ -174,11 +172,11 @@ The AI-powered lease negotiation system is the core innovative feature:
 
 RentMatch.AI is built on a modern tech stack:
 
-- **Backend**: Django (Python) with Django Channels for WebSockets
+- **Backend**: Django 5.2 (Python 3.13.3) with Django Channels for WebSockets
 - **Database**: SQLite3 (pre-configured with sample data)
 - **Real-time communication**: Redis + Django Channels
 - **AI integration**: Google Gemini Pro API
-- **Frontend**: Django templates with Bootstrap 5, JavaScript, and AJAX
+- **Frontend**: Django templates with Bootstrap 5 and JavaScript
 
 ### Key Components
 
