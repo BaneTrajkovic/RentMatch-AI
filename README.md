@@ -73,6 +73,15 @@ The project includes a pre-configured SQLite3 database with sample data already 
 python manage.py runserver
 ```
 
+### 7. Accessing the Application
+
+**Important:** Access the application by navigating to:
+```
+http://localhost:8000/users/login/
+```
+
+Use the provided test credentials to log in and explore the platform.
+
 ## User Credentials
 
 ### Renter Access
