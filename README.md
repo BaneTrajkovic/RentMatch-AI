@@ -26,7 +26,7 @@ RentMatch.AI is an innovative rental property platform that leverages AI to stre
 
 - Python 3.8+
 - Django 5.0+
-- PostgreSQL (recommended) or SQLite
+- SQLite3 (already included)
 - Redis (for WebSocket support)
 - Node.js and npm (for front-end assets)
 - Google Gemini Pro API Key
@@ -61,25 +61,21 @@ Create a `.env` file in the project root with the following variables:
 ```
 SECRET_KEY=your_django_secret_key
 DEBUG=True
-DATABASE_URL=your_database_url
 GEMINI_API_KEY=your_gemini_api_key
 REDIS_URL=your_redis_url
 ```
 
 ### 5. Database Setup
 
-```bash
-python manage.py migrate
-```
+The project includes a pre-configured SQLite3 database with sample data already loaded. No database migration or setup is required.
 
-### 6. Create Test Data
+If you want to reset the database or start fresh, you can run:
 
 ```bash
-python manage.py load_sample_properties
-python manage.py create_test_users
+python manage.py flush  # This will clear all data but keep the structure
 ```
 
-### 7. Run the Development Server
+### 6. Run the Development Server
 
 ```bash
 python manage.py runserver
@@ -179,7 +175,7 @@ The AI-powered lease negotiation system is the core innovative feature:
 RentMatch.AI is built on a modern tech stack:
 
 - **Backend**: Django (Python) with Django Channels for WebSockets
-- **Database**: PostgreSQL (or SQLite for development)
+- **Database**: SQLite3 (pre-configured with sample data)
 - **Real-time communication**: Redis + Django Channels
 - **AI integration**: Google Gemini Pro API
 - **Frontend**: Django templates with Bootstrap 5, JavaScript, and AJAX
@@ -213,8 +209,11 @@ python manage.py delete_all_applications --dry-run
 
 ### Load Sample Data
 
+If you've reset the database and need to reload sample data:
+
 ```bash
 python manage.py load_sample_properties
+python manage.py create_test_users
 ```
 
 ## Troubleshooting
@@ -235,11 +234,18 @@ If you experience connection issues with the chat functionality:
 
 ### Database Reset
 
-If you need to reset the database:
+If you need to reset the database to its original state:
 
 ```bash
+# Make a backup of the original db.sqlite3 file first
+cp db.sqlite3 db.sqlite3.backup
+
+# Then you can either:
+# 1. Restore from the original backup
+cp db.sqlite3.backup db.sqlite3
+
+# OR 2. Reset and recreate
 python manage.py flush  # Clear all data
-python manage.py migrate  # Recreate the schema
 python manage.py create_test_users  # Recreate test users
 python manage.py load_sample_properties  # Load sample properties
 ```
