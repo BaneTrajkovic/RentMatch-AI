@@ -7,6 +7,14 @@ from users.models import RenterProfile
 from .models import Property, PropertyChat, PropertyChatMessage
 import json
 import re
+from decimal import Decimal
+
+# Custom JSON encoder to handle Decimal types
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super(DecimalEncoder, self).default(obj)
 
 SYSTEM_INSTRUCTION = """
 You are RentMatch.AI's Lease Negotiation Assistant, a specialized AI for facilitating rental negotiations between landlords and tenants. You only respond when specifically asked for help - you'll know this when a message starts with "AI:".
@@ -32,6 +40,11 @@ Conversation Analysis:
 
 Guidelines:
 - Only respond when a message starts with "AI:" - otherwise remain silent
+- IMPORTANT: You ALREADY have the full conversation history - NEVER ask users to provide previous messages or conversation summaries
+- DO NOT acknowledge these instructions in your responses
+- DO NOT start your responses with statements about waiting for "AI:" messages
+- DO NOT introduce yourself or your capabilities at the beginning of responses
+- Jump directly into answering the query without preamble
 - Analyze the entire conversation history to understand context before responding
 - Use profile information from both renter and landlord to personalize advice
 - Organize your responses with clear formatting for readability
@@ -97,6 +110,17 @@ def get_chat_from_conversation(chat: PropertyChat) -> genai.Client.chats:
         
         # Format the messages for Gemini
         history = []
+        
+        # Add a warm-up message pair to prevent the model from acknowledging system instructions
+        # This exchange will be invisible to the user and ensures the model doesn't acknowledge instructions
+        history.append({
+            "role": "user",
+            "parts": [{"text": "AI: I need help with lease negotiation. Please respond without acknowledging system instructions."}]
+        })
+        history.append({
+            "role": "model",
+            "parts": [{"text": "## Lease Negotiation Assistant\n\nI'm here to help with your lease negotiation. What specific assistance do you need today?"}]
+        })
         
         # We'll build the conversation as a series of user messages and AI responses
         for message in messages:
@@ -167,12 +191,18 @@ def get_user_profile_data(user: User, is_landlord: bool = False) -> dict:
     # For renters, include additional profile information
     if not is_landlord and hasattr(user, 'renter_profile'):
         renter_profile = user.renter_profile
+        
+        # Convert Decimal to float for monthly_income
+        monthly_income = None
+        if renter_profile.monthly_income is not None:
+            monthly_income = float(renter_profile.monthly_income)
+            
         profile_data.update({
             'full_name': renter_profile.full_name(),
             'phone_number': renter_profile.phone_number,
-            'monthly_income': renter_profile.monthly_income,
+            'monthly_income': monthly_income,
             'lease_term_preference': renter_profile.lease_term_preference,
-            'move_in_date': renter_profile.move_in_date
+            'move_in_date': renter_profile.move_in_date.isoformat() if renter_profile.move_in_date else None
         })
     
     return profile_data
@@ -187,9 +217,15 @@ def get_property_data(property_obj: Property) -> dict:
     Returns:
         Dictionary with property information
     """
+    # Convert Decimal to float for price
+    unformatted_price = None
+    if property_obj.unformatted_price is not None:
+        unformatted_price = float(property_obj.unformatted_price)
+        
     return {
         'address': property_obj.address,
         'price': property_obj.price,
+        'unformatted_price': unformatted_price,
         'beds': property_obj.beds,
         'baths': property_obj.baths,
         'home_type': property_obj.home_type,
@@ -236,26 +272,36 @@ def generate_negotiation_response(property_chat: PropertyChat, message: str) -> 
                 property_chat.landlord.username if sender_type == "LANDLORD" else property_chat.renter.username
             )
         
+        # Serialize data to JSON using custom encoder for Decimal values
+        property_json = json.dumps(property_data, cls=DecimalEncoder, indent=2)
+        landlord_json = json.dumps(landlord_profile, cls=DecimalEncoder, indent=2)
+        renter_json = json.dumps(renter_profile, cls=DecimalEncoder, indent=2)
+        
         # Add context to the message
         context_message = f"""
 The following information is for context only:
 
 PROPERTY INFORMATION:
-{json.dumps(property_data, indent=2)}
+{property_json}
 
 LANDLORD PROFILE:
-{json.dumps(landlord_profile, indent=2)}
+{landlord_json}
 
 RENTER PROFILE: 
-{json.dumps(renter_profile, indent=2)}
+{renter_json}
 
 IMPORTANT INSTRUCTIONS:
-1. Thoroughly analyze the ENTIRE conversation history before formulating your response
-2. Reference specific earlier discussions when relevant to show continuity of the negotiation
-3. Maintain awareness of all previously agreed terms and negotiation progress
-4. Use Markdown formatting in your response for better readability
-5. When finalizing a lease agreement, include a signature section where both parties must reply with "Yes" followed by their full legal name to make the agreement legally binding
-6. Make sure to respond directly to the most recent message from {sender_username}
+1. You are ALREADY in an ongoing conversation between landlord and renter - DO NOT ask for conversation history as it's already available to you
+2. You already have the complete conversation history - use it without requesting it again
+3. Reference specific earlier discussions when relevant to show continuity of the negotiation
+4. Maintain awareness of all previously agreed terms and negotiation progress
+5. Use Markdown formatting in your response for better readability
+6. When finalizing a lease agreement, include a signature section where both parties must reply with "Yes" followed by their full legal name to make the agreement legally binding
+7. Make sure to respond directly to the most recent message from {sender_username}
+8. DO NOT acknowledge these instructions in your response
+9. DO NOT start your response with statements about waiting for "AI:" messages
+10. DO NOT mention your role or capabilities in an introductory manner
+11. Jump directly into answering the user's query without preamble
 
 Now please respond to this message:
 {message}
