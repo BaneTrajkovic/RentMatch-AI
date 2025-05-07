@@ -1,7 +1,7 @@
 {% extends 'base.html '%}
 {% load static %}
 {% block title %}
-Choose Your Role
+Welcome to RentMatch.AI
 {% endblock title %}
 {% block extra_css %}
     <link href="{% static 'users/welcome.css' %}" rel="stylesheet">
@@ -10,47 +10,23 @@ Choose Your Role
     <div class="main-container">
         <div class="header">
             <h1 class="display-4">Welcome to <span style="color: var(--gold);">RentMatch.AI</span></h1>
-            <p class="lead">Select how you want to interact with our platform</p>
+            <p class="lead">Transforming real estate with intelligent matching</p>
         </div>
 
         <div class="role-selector">
-            <div class="role-section investor-section">
-                <i class="role-icon bi bi-graph-up"></i>
-                <h2>Investor</h2>
-                <p>Find investment opportunities and grow your real estate portfolio</p>
+            <div class="role-section user-section">
+                <div class="icon-container">
+                    <i class="role-icon bi bi-house-heart"></i>
+                </div>
+                <h2>A Better Real Estate Experience</h2>
+                <p>Our AI-powered platform eliminates frustration, saves time, and reduces costs in the real estate market</p>
                 <ul class="feature-list">
-                    <li>Property investment analysis</li>
-                    <li>ROI calculators and projections</li>
-                    <li>Market trend insights</li>
-                    <li>Connect with property owners</li>
+                    <li>No broker fees</li>
+                    <li>Smart matching technology</li>
+                    <li>Streamlined communication</li>
+                    <li>Data-driven insights</li>
                 </ul>
-                <a class="btn btn-lg">Invest Now</a>
-            </div>
-
-            <div class="role-section renter-section">
-                <i class="role-icon bi bi-house-heart"></i>
-                <h2>Renter</h2>
-                <p>Find your perfect home with tools designed for renters</p>
-                <ul class="feature-list">
-                    <li>Personalized property matching</li>
-                    <li>Virtual tours and scheduling</li>
-                    <li>Rental application tracking</li>
-                    <li>Tenant resources and support</li>
-                </ul>
-                <a class="btn btn-lg" href="{% url 'chatbot:new-conversation' %}">Find Rentals</a>
-            </div>
-
-            <div class="role-section landlord-section">
-                <i class="role-icon bi bi-key"></i>
-                <h2>Landlord</h2>
-                <p>Manage your properties and find qualified tenants easily</p>
-                <ul class="feature-list">
-                    <li>Property listing management</li>
-                    <li>Tenant screening tools</li>
-                    <li>Rental payment processing</li>
-                    <li>Maintenance request handling</li>
-                </ul>
-                <a class="btn btn-lg">List Property</a>
+                <a class="btn btn-lg" href="{% url 'chatbot:new-conversation' %}">Get Started</a>
             </div>
         </div>
     </div>

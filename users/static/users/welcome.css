@@ -14,7 +14,7 @@ body, html {
 
 .header {
     text-align: center;
-    padding: 20px;
+    padding: 40px 20px;
     background-color: var(--cream);
     box-shadow: 0 2px 10px rgba(184, 134, 11, 0.2);
     z-index: 100;
@@ -24,11 +24,14 @@ body, html {
 .role-selector {
     display: flex;
     flex: 1;
-    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
 }
 
 .role-section {
-    flex: 1;
+    max-width: 600px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -36,39 +39,28 @@ body, html {
     transition: all 0.5s ease;
     position: relative;
     overflow: hidden;
-    padding: 20px;
+    padding: 40px;
     color: var(--charcoal);
-    cursor: pointer;
+    border-radius: 15px;
     border: 1px solid var(--light-gold);
-}
-
-.role-section:hover {
-    flex: 2; /* Expand on hover */
-    box-shadow: 0 0 30px rgba(184, 134, 11, 0.3);
-    z-index: 10;
+    background: linear-gradient(135deg, var(--cream), var(--off-white));
+    box-shadow: 0 10px 30px rgba(184, 134, 11, 0.2);
 }
 
 .role-section h2 {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     margin-bottom: 20px;
     transition: all 0.3s ease;
     color: var(--dark-gold);
 }
 
-.role-section:hover h2 {
-    font-size: 3rem;
-}
-
 .role-section p {
-    opacity: 0.8;
-    max-width: 300px;
+    opacity: 0.9;
+    max-width: 500px;
     text-align: center;
     margin-bottom: 30px;
-    transition: all 0.3s ease;
-}
-
-.role-section:hover p {
-    opacity: 1;
+    font-size: 1.2rem;
+    line-height: 1.6;
 }
 
 .btn {
@@ -80,7 +72,10 @@ body, html {
     overflow: hidden;
     z-index: 1;
     transition: all 0.3s ease;
-    padding: 10px 30px;
+    padding: 12px 40px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 .btn::after {
@@ -109,53 +104,51 @@ body, html {
     opacity: 1;
     transform: scale(1);
     transition: all 0.3s ease;
+    margin-top: 10px;
 }
 
-.role-section:hover .btn {
-    opacity: 1;
-    transform: scale(1.05);
-}
-
-.investor-section {
-    background: linear-gradient(135deg, var(--cream), var(--off-white));
-}
-
-.renter-section {
-    background: linear-gradient(135deg, var(--light-gold), var(--cream));
-}
-
-.landlord-section {
-    background: linear-gradient(135deg, var(--off-white), var(--cream));
-}
-
-.role-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-    color: var(--gold);
-}
-
-.role-section:hover .role-icon {
-    transform: scale(1.2);
-    color: var(--dark-gold);
-}
-
-.feature-list {
-    display: none;
-    list-style-type: none;
-    padding: 0;
+.icon-container {
+    display: flex;
+    justify-content: center;
     margin-bottom: 30px;
 }
 
-.role-section:hover .feature-list {
-    display: block;
-    animation: fadeIn 0.5s ease;
+.role-icon {
+    font-size: 4.5rem;
+    transition: all 0.4s ease;
+    color: var(--gold);
+    background-color: var(--off-white);
+    width: 120px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    border: 3px solid var(--light-gold);
+    box-shadow: 0 8px 25px rgba(184, 134, 11, 0.25);
+}
+
+.role-icon:hover {
+    transform: scale(1.05) translateY(-5px);
+    color: var(--dark-gold);
+    box-shadow: 0 12px 30px rgba(184, 134, 11, 0.4);
+}
+
+.feature-list {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 30px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    width: 100%;
 }
 
 .feature-list li {
     margin-bottom: 10px;
     display: flex;
     align-items: center;
+    font-size: 1.1rem;
 }
 
 .feature-list li::before {
@@ -163,9 +156,34 @@ body, html {
     margin-right: 10px;
     color: var(--gold);
     font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.user-section {
+    animation: fadeIn 0.8s ease;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .feature-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .role-section {
+        padding: 30px 20px;
+    }
+    
+    .icon-container {
+        gap: 20px;
+    }
+    
+    .role-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2.5rem;
+    }
 }
