@@ -4,9 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Landlord Dashboard - RentMatch.AI</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <style>
     :root {
       --gold: #B8860B;
@@ -21,11 +26,11 @@
     body {
       background-color: var(--off-white);
       color: var(--charcoal);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       height: 100vh;
       overflow-x: hidden;
     }
 
+    /* Sidebar styles */
     .sidebar {
       background-color: var(--gold);
       height: 100vh;
@@ -39,7 +44,7 @@
     }
 
     .sidebar:hover {
-      width: 250px;
+      width: 280px;
     }
 
     .sidebar-header {
@@ -92,6 +97,8 @@
       text-decoration: none;
       transition: all 0.2s;
       border-left: 4px solid transparent;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
     .menu-item:hover,
@@ -117,50 +124,161 @@
       opacity: 1;
     }
 
+    /* Main content area */
     .main-content {
       margin-left: 80px;
-      padding: 2rem;
       transition: all 0.3s;
+      padding: 2rem;
     }
 
-    .sidebar:hover ~ .main-content {
-      margin-left: 250px;
+    .content-header {
+      background-color: white;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dashboard-title {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin: 0;
+    }
+
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.07);
+      transition: transform 0.2s;
+      margin-bottom: 1.5rem;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
     }
 
     .card-title {
       color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .card p {
+      margin-bottom: 0;
+      font-size: 1.2rem;
+      font-weight: 500;
     }
 
     .section-title {
       margin-top: 3rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
       font-weight: bold;
       font-size: 1.75rem;
       color: var(--dark-gold);
+      border-left: 4px solid var(--gold);
+      padding-left: 0.75rem;
+    }
+    
+    .table {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .table thead {
+      background-color: var(--light-gold);
+      color: var(--charcoal);
+    }
+    
+    .list-group-item {
+      border-color: var(--light-gold);
+      padding: 0.75rem 1rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 60px;
+      }
+
+      .sidebar:hover {
+        width: 240px;
+      }
+
+      .main-content {
+        margin-left: 60px;
+      }
+    }
+    
+    /* Sidebar menu spacing */
+    .sidebar-menu {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 110px);
+    }
+
+    /* Make the spacer push the logout to bottom */
+    .sidebar-spacer {
+      flex-grow: 1;
     }
   </style>
 </head>
 <body>
   <!-- Sidebar -->
-  <div class="sidebar">
+  <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <i class="bi bi-house-heart-fill sidebar-icon"></i>
       <a class="sidebar-logo-text" href="{% url 'users:welcome' %}">RentMatch.AI</a>
     </div>
     <div class="sidebar-menu mt-4">
-      <a href="{% url 'negotiation:property_list' %}" class="menu-item"><i class="bi bi-house-door"></i><span class="menu-text">Properties</span></a>
-      <a href="{% url 'chatbot:new-conversation' %}" class="menu-item"><i class="bi bi-chat-dots-fill"></i><span class="menu-text">AI Assistant</span></a>
-      <a href="{% url 'negotiation:chat_list' %}" class="menu-item"><i class="bi bi-file-earmark-text"></i><span class="menu-text">Applications</span></a>
-      <a href="{% url 'users:profile' %}" class="menu-item"><i class="bi bi-person"></i><span class="menu-text">My Profile</span></a>
+      <a href="{% url 'negotiation:property_list' %}" class="menu-item">
+        <i class="bi bi-house-door"></i>
+        <span class="menu-text">Properties</span>
+      </a>
+      <a href="{% url 'chatbot:new-conversation' %}" class="menu-item">
+        <i class="bi bi-chat-dots-fill"></i>
+        <span class="menu-text">AI Assistant</span>
+      </a>
+      <a href="{% url 'negotiation:chat_list' %}" class="menu-item">
+        <i class="bi bi-file-earmark-text"></i>
+        <span class="menu-text">Applications</span>
+      </a>
+      <a href="{% url 'users:profile' %}" class="menu-item">
+        <i class="bi bi-person"></i>
+        <span class="menu-text">My Profile</span>
+      </a>
+      <div class="sidebar-spacer"></div>
+      <form action="{% url 'users:logout' %}" method="post" class="menu-item" style="border: none; background: transparent; padding: 0;">
+        {% csrf_token %}
+        <button type="submit" class="menu-item border-0 bg-transparent w-100 text-start" onclick="return confirm('Are you sure you want to logout?')">
+          <i class="bi bi-box-arrow-left"></i>
+          <span class="menu-text">Logout</span>
+        </button>
+      </form>
     </div>
   </div>
 
   <!-- Main Content -->
-  <div class="main-content container">
-    <h1 class="text-center mb-5" style="color:#B8860B">🏠 Landlord Dashboard</h1>
+  <div class="main-content">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-buildings me-3" style="color: var(--gold); font-size: 2rem;"></i>
+        <h1 class="dashboard-title">Landlord Dashboard</h1>
+      </div>
+      <div>
+        <a href="{% url 'users:profile' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-person"></i> Back to Profile
+        </a>
+      </div>
+    </div>
 
     <!-- Dashboard Overview -->
-    <div class="row g-4">
+    <div class="row g-4 mb-4">
       <div class="col-md-3">
         <div class="card p-3">
           <h5 class="card-title">Total Monthly Revenue</h5>
@@ -188,80 +306,89 @@
     </div>
 
     <!-- Properties -->
-    <div class="section-title">🏢 Properties</div>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Property</th>
-          <th>Address</th>
-          <th>Rent</th>
-          <th>Status</th>
-          <th>Insight</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Elm St Apt</td>
-          <td>23 Elm St</td>
-          <td>$2,700</td>
-          <td>Vacant</td>
-          <td>Just became vacant</td>
-        </tr>
-        <tr>
-          <td>Broadway Loft</td>
-          <td>54 Broadway</td>
-          <td>$3,200</td>
-          <td>Occupied</td>
-          <td>10% under market</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="section-title"><i class="bi bi-building me-2"></i>Properties</div>
+    <div class="card p-0">
+      <table class="table table-striped mb-0">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Address</th>
+            <th>Rent</th>
+            <th>Status</th>
+            <th>Insight</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Elm St Apt</strong></td>
+            <td>23 Elm St</td>
+            <td>$2,700</td>
+            <td><span class="badge bg-warning">Vacant</span></td>
+            <td>Just became vacant</td>
+          </tr>
+          <tr>
+            <td><strong>Broadway Loft</strong></td>
+            <td>54 Broadway</td>
+            <td>$3,200</td>
+            <td><span class="badge bg-success">Occupied</span></td>
+            <td>10% under market</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Leads -->
-    <div class="section-title">📨 Leads</div>
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Budget</th>
-          <th>Pet Owner</th>
-          <th>Credit Score</th>
-          <th>Lead Score</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Jane Doe</td>
-          <td>$2,800</td>
-          <td>Yes</td>
-          <td>720</td>
-          <td>High</td>
-        </tr>
-        <tr>
-          <td>Mark Smith</td>
-          <td>$3,500</td>
-          <td>No</td>
-          <td>680</td>
-          <td>Medium</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="section-title"><i class="bi bi-envelope me-2"></i>Leads</div>
+    <div class="card p-0">
+      <table class="table table-bordered mb-0">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Budget</th>
+            <th>Pet Owner</th>
+            <th>Credit Score</th>
+            <th>Lead Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Jane Doe</strong></td>
+            <td>$2,800</td>
+            <td>Yes</td>
+            <td>720</td>
+            <td><span class="badge bg-success">High</span></td>
+          </tr>
+          <tr>
+            <td><strong>Mark Smith</strong></td>
+            <td>$3,500</td>
+            <td>No</td>
+            <td>680</td>
+            <td><span class="badge bg-warning">Medium</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Analytics -->
-    <div class="section-title">📊 Analytics</div>
+    <div class="section-title"><i class="bi bi-graph-up me-2"></i>Analytics</div>
     <div class="card p-4 mb-4">
-      <h5>Rent Pricing History vs Market</h5>
+      <h5 class="card-title">Rent Pricing History vs Market</h5>
       <canvas id="rentChart" width="400" height="150"></canvas>
     </div>
 
     <!-- Insights -->
-    <div class="section-title">💡 Insights</div>
-    <ul class="list-group">
-      <li class="list-group-item">Demand up 30% for 3BD in Downtown</li>
-      <li class="list-group-item">Laundry adds +25% to engagement</li>
-      <li class="list-group-item">Run simulation: +5% rent = -12% leads</li>
-    </ul>
+    <div class="section-title"><i class="bi bi-lightbulb me-2"></i>Insights</div>
+    <div class="card">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><i class="bi bi-graph-up-arrow text-success me-2"></i> Demand up 30% for 3BD in Downtown</li>
+        <li class="list-group-item"><i class="bi bi-patch-check text-primary me-2"></i> Laundry adds +25% to engagement</li>
+        <li class="list-group-item"><i class="bi bi-calculator text-warning me-2"></i> Run simulation: +5% rent = -12% leads</li>
+      </ul>
+    </div>
   </div>
+
+  <!-- Bootstrap 5 JS with Popper -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
   <script>
     const ctx = document.getElementById('rentChart').getContext('2d');
@@ -274,7 +401,9 @@
             label: 'My Listings',
             data: [2500, 2700, 2600, 2750, 2900, 3000],
             borderColor: '#B8860B',
-            tension: 0.3
+            backgroundColor: 'rgba(184, 134, 11, 0.1)',
+            tension: 0.3,
+            fill: true
           },
           {
             label: 'Market Average',
@@ -289,6 +418,15 @@
         plugins: {
           legend: {
             position: 'bottom'
+          },
+          title: {
+            display: true,
+            text: 'Rental Pricing Trends (6-Month)',
+            color: '#333333',
+            font: {
+              size: 16,
+              weight: 'bold'
+            }
           }
         }
       }

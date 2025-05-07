@@ -282,6 +282,12 @@
                 <a href="{% url 'users:profile_edit' %}" class="btn btn-primary me-2">
                     <i class="bi bi-pencil me-2"></i>Edit Profile
                 </a>
+                <a href="{% url 'users:landlord' %}" class="btn btn-outline-warning me-2" style="color: var(--gold); border-color: var(--gold);">
+                    <i class="bi bi-buildings me-2"></i>Landlord Dashboard
+                </a>
+                <a href="{% url 'users:investor' %}" class="btn btn-outline-warning me-2" style="color: var(--gold); border-color: var(--gold);">
+                    <i class="bi bi-graph-up-arrow me-2"></i>Investor Dashboard
+                </a>
                 <form action="{% url 'users:logout' %}" method="post" class="d-inline" id="logout-form">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to logout?')">

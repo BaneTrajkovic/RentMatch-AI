@@ -97,6 +97,49 @@
     .bot-message a:hover {
         text-decoration: underline;
     }
+
+    /* AI Help Modal Styles */
+    #aiHelpModal .modal-header {
+        background-color: var(--gold);
+        color: white;
+    }
+
+    #aiHelpModal .modal-title {
+        color: white;
+        font-weight: 600;
+    }
+
+    #aiHelpModal .fw-bold.text-primary {
+        color: var(--gold) !important;
+    }
+
+    #aiHelpModal .alert-info {
+        background-color: var(--cream);
+        border-color: var(--light-gold);
+        color: var(--charcoal);
+    }
+
+    #aiHelpModal .bi-check-circle-fill {
+        color: var(--gold) !important;
+    }
+
+    #aiHelpModal .bi-arrow-right-circle {
+        color: var(--gold);
+    }
+
+    #aiHelpModal .modal-footer .btn-primary {
+        background-color: var(--gold);
+        border-color: var(--gold);
+    }
+
+    #aiHelpModal .modal-footer .btn-primary:hover {
+        background-color: var(--dark-gold);
+        border-color: var(--dark-gold);
+    }
+
+    #aiHelpModal .list-group-item {
+        border-color: var(--light-gold);
+    }
 </style>
 {% endblock %}
 
@@ -120,7 +163,7 @@
         <a href="{% url 'negotiation:chat_list' %}" class="btn btn-sm btn-outline-secondary me-2">
             <i class="bi bi-arrow-left"></i> Back to Applications
         </a>
-        <button type="button" class="btn btn-sm btn-outline-info ms-2" data-bs-toggle="modal" data-bs-target="#aiHelpModal">
+        <button type="button" class="btn btn-sm btn-outline-warning ms-2" data-bs-toggle="modal" data-bs-target="#aiHelpModal" style="color: var(--gold); border-color: var(--gold);">
             <i class="bi bi-robot"></i> AI Assistant Help
         </button>
     </div>
@@ -177,9 +220,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="aiHelpModalLabel">AI Lease Negotiation Assistant</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="background-color: var(--off-white);">
         <div class="mb-4">
           <h6 class="fw-bold text-primary">How to Use the AI Lease Assistant:</h6>
           <p>To get help from our AI assistant, simply start your message with <code>AI:</code> followed by your request.</p>
@@ -224,7 +267,7 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" style="background-color: var(--cream);">
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
       </div>
     </div>

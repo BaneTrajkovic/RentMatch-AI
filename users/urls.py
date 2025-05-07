@@ -19,6 +19,7 @@ from django.urls import path
 from . import views
 from django.views.generic import TemplateView
 from django.contrib.auth.views import LogoutView
+from django.contrib.auth.decorators import login_required
 
 app_name = "users"
 urlpatterns = [
@@ -28,4 +29,6 @@ urlpatterns = [
     path("welcome/", views.ChooseUserRoleView.as_view(), name="welcome"),
     path("profile/", views.RenterProfileView.as_view(), name="profile"),
     path("profile/edit/", views.RenterProfileUpdateView.as_view(), name="profile_edit"),
+    path("landlord/", login_required(TemplateView.as_view(template_name="users/landlord.html")), name="landlord"),
+    path("investor/", login_required(TemplateView.as_view(template_name="users/investor.html")), name="investor"),
 ]
