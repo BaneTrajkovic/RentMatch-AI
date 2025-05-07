@@ -1,6 +1,41 @@
 {% extends 'negotiation/base.html' %}
 
-{% block title %}Start New Chat - RentMatch.AI{% endblock %}
+{% block title %}Start New Application - RentMatch.AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .property-image {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+    
+    .property-option {
+        border: 2px solid transparent;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 12px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .property-option:hover {
+        border-color: var(--light-gold);
+        background-color: rgba(218, 165, 32, 0.05);
+    }
+    
+    .property-option.selected {
+        border-color: var(--gold);
+        background-color: rgba(218, 165, 32, 0.1);
+    }
+    
+    .property-details {
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="content-header">
@@ -33,14 +68,32 @@
                     <form id="newChatForm" class="needs-validation" novalidate>
                         <div class="mb-3">
                             <label for="propertySelect" class="form-label">Select Property</label>
-                            <select class="form-select form-select-lg" id="propertySelect" required>
-                                <option value="">-- Select a property --</option>
+                            <input type="hidden" id="selectedProperty" name="selectedProperty" required>
+                            
+                            <div class="properties-container">
                                 {% for property in properties %}
-                                <option value="{{ property.id }}">{{ property.title }} - {{ property.address }}</option>
+                                <div class="property-option" data-property-id="{{ property.zpid }}">
+                                    {% if property.main_image_url %}
+                                    <img src="{{ property.main_image_url }}" class="property-image" alt="{{ property.address }}">
+                                    {% else %}
+                                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=150&q=80" class="property-image" alt="{{ property.address }}">
+                                    {% endif %}
+                                    <h5>{{ property.price }}</h5>
+                                    <div class="property-details">
+                                        <p class="mb-1"><i class="bi bi-geo-alt text-muted me-1"></i>{{ property.address }}</p>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span>{{ property.beds|default:"0" }} beds</span>
+                                            <span>{{ property.baths|default:"0" }} baths</span>
+                                            {% if property.home_type %}
+                                            <span>{{ property.home_type }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
                                 {% endfor %}
-                            </select>
+                            </div>
                             <div class="invalid-feedback">
-                                Please select a property to discuss.
+                                Please select a property.
                             </div>
                         </div>
 
@@ -79,7 +132,7 @@
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-warning btn-lg">
-                                <i class="bi bi-chat-left-fill me-2"></i> Start Chat
+                                <i class="bi bi-chat-left-fill me-2"></i> Start Application
                             </button>
                         </div>
                     </form>
@@ -93,6 +146,29 @@
 {% block extra_js %}
 <script>
     $(document).ready(function () {
+        // Handle property selection
+        $('.property-option').on('click', function() {
+            // Remove selected class from all properties
+            $('.property-option').removeClass('selected');
+            
+            // Add selected class to clicked property
+            $(this).addClass('selected');
+            
+            // Set the hidden input value
+            const propertyId = $(this).data('property-id');
+            $('#selectedProperty').val(propertyId);
+        });
+
+        // Parse URL parameters to pre-select property if coming from property listing
+        const urlParams = new URLSearchParams(window.location.search);
+        const propertyParam = urlParams.get('property');
+        if (propertyParam) {
+            const propertyOption = $(`.property-option[data-property-id="${propertyParam}"]`);
+            if (propertyOption.length) {
+                propertyOption.trigger('click');
+            }
+        }
+
         // Form validation
         const forms = document.querySelectorAll('.needs-validation');
 
@@ -114,64 +190,68 @@
                 return;
             }
 
-            const propertyId = $('#propertySelect').val();
+            const propertyId = $('#selectedProperty').val();
             const userId = $('#userSelect').val();
             const initialMessage = $('#initialMessage').val().trim();
+
+            // Additional validation for property selection
+            if (!propertyId) {
+                alert('Please select a property');
+                return;
+            }
 
             // Determine landlord and renter based on user role
             let landlordId, renterId;
             {% if is_landlord %}
-            landlordId = {{ user.id }
-        };
-        renterId = userId;
-        {% else %}
-        landlordId = userId;
-        renterId = {{ user.id }
-    };
-    {% endif %}
+            landlordId = {{ user.id }};
+            renterId = userId;
+            {% else %}
+            landlordId = userId;
+            renterId = {{ user.id }};
+            {% endif %}
 
-    // Show loading state
-    $('#newChatForm button[type="submit"]').html('<i class="bi bi-hourglass-split me-2"></i> Connecting...').prop('disabled', true);
+            // Show loading state
+            $('#newChatForm button[type="submit"]').html('<i class="bi bi-hourglass-split me-2"></i> Connecting...').prop('disabled', true);
 
-    // Create WebSocket connection
-    const chatSocket = new WebSocket(
-        'ws://' + window.location.host + '/ws/property_chat/new/'
-    );
+            // Create WebSocket connection
+            const chatSocket = new WebSocket(
+                'ws://' + window.location.host + '/ws/property_chat/new/'
+            );
 
-    chatSocket.onopen = function (e) {
-        console.log('WebSocket connection established');
+            chatSocket.onopen = function (e) {
+                console.log('WebSocket connection established');
 
-        // Send initial data to create the chat
-        chatSocket.send(JSON.stringify({
-            'type': 'message',
-            'message': initialMessage,
-            'property_id': propertyId,
-            'landlord_id': landlordId,
-            'renter_id': renterId
-        }));
-    };
+                // Send initial data to create the chat
+                chatSocket.send(JSON.stringify({
+                    'type': 'message',
+                    'message': initialMessage,
+                    'property_id': propertyId,
+                    'landlord_id': landlordId,
+                    'renter_id': renterId
+                }));
+            };
 
-    chatSocket.onmessage = function (e) {
-        const data = JSON.parse(e.data);
+            chatSocket.onmessage = function (e) {
+                const data = JSON.parse(e.data);
 
-        if (data.type === 'chat_created') {
-            // Redirect to the newly created chat
-            window.location.href = `/negotiation/chat/${data.chat.id}/`;
-        } else if (data.type === 'error') {
-            // Show error message
-            alert('Error: ' + data.message);
-            $('#newChatForm button[type="submit"]').html('<i class="bi bi-chat-left-fill me-2"></i> Start Chat').prop('disabled', false);
-        }
-    };
+                if (data.type === 'chat_created') {
+                    // Redirect to the newly created chat
+                    window.location.href = `/negotiation/chat/${data.chat.id}/`;
+                } else if (data.type === 'error') {
+                    // Show error message
+                    alert('Error: ' + data.message);
+                    $('#newChatForm button[type="submit"]').html('<i class="bi bi-chat-left-fill me-2"></i> Start Application').prop('disabled', false);
+                }
+            };
 
-    chatSocket.onclose = function (e) {
-        console.error('WebSocket connection closed unexpectedly');
-        $('#newChatForm button[type="submit"]').html('<i class="bi bi-chat-left-fill me-2"></i> Start Chat').prop('disabled', false);
+            chatSocket.onclose = function (e) {
+                console.error('WebSocket connection closed unexpectedly');
+                $('#newChatForm button[type="submit"]').html('<i class="bi bi-chat-left-fill me-2"></i> Start Application').prop('disabled', false);
 
-        if (e.code !== 1000) {
-            alert('Connection error. Please try again.');
-        }
-    };
+                if (e.code !== 1000) {
+                    alert('Connection error. Please try again.');
+                }
+            };
         });
     });
 </script>

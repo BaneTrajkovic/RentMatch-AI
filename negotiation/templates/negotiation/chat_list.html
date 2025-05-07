@@ -2,18 +2,91 @@
 
 {% block title %}My Applications - RentMatch.AI{% endblock %}
 
+{% block extra_css %}
+<style>
+    .property-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: none;
+        overflow: hidden;
+    }
+    
+    .property-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .property-image {
+        height: 200px;
+        width: 100%;
+        object-fit: cover;
+    }
+    
+    .card-header-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+        color: white;
+        padding: 20px 15px;
+    }
+    
+    .image-container {
+        position: relative;
+    }
+    
+    .property-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .landlord-badge {
+        background-color: var(--gold);
+        color: white;
+    }
+    
+    .renter-badge {
+        background-color: var(--light-gold);
+        color: var(--charcoal);
+    }
+    
+    .property-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+    
+    .meta-item i {
+        margin-right: 5px;
+        color: var(--gold);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="content-header">
     <div class="d-flex align-items-center">
         <i class="bi bi-file-earmark-text-fill me-2" style="color: var(--gold); font-size: 1.5rem;"></i>
         <div>
             <div class="chat-header-title">My Applications</div>
-            <div class="small text-muted">Connect with landlords and renters</div>
+            <div class="small text-muted">Manage your property applications</div>
         </div>
     </div>
     <div class="d-flex align-items-center">
-        <a href="{% url 'negotiation:new_chat' %}" class="btn btn-sm btn-warning me-2">
-            <i class="bi bi-plus-circle"></i> New Application
+        <a href="{% url 'negotiation:property_list' %}" class="btn btn-sm btn-outline-warning">
+            <i class="bi bi-house-door"></i> Browse Properties
         </a>
     </div>
 </div>
@@ -25,23 +98,58 @@
                 <div class="row row-cols-1 row-cols-md-2 g-4">
                     {% for chat in chats %}
                     <div class="col">
-                        <div class="card h-100 shadow-sm property-card">
-                            <div class="card-body">
-                                <h5 class="card-title text-truncate">{{ chat.title }}</h5>
-                                <h6 class="card-subtitle mb-2 text-muted">Property: {{ chat.property.title }}</h6>
-                                <p class="card-text">
+                        <div class="card h-100 shadow property-card">
+                            <div class="image-container">
+                                {% if chat.property.main_image_url %}
+                                <img src="{{ chat.property.main_image_url }}" class="property-image" alt="{{ chat.property.address }}">
+                                {% else %}
+                                <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=200&q=80" class="property-image" alt="{{ chat.property.address }}">
+                                {% endif %}
+                                
+                                <div class="property-badge {% if user == chat.landlord %}landlord-badge{% else %}renter-badge{% endif %}">
                                     {% if user == chat.landlord %}
-                                        <span class="badge bg-success">Landlord</span>
-                                        Application from <strong>{{ chat.renter.username }}</strong>
+                                        Landlord
                                     {% else %}
-                                        <span class="badge bg-info">Renter</span>
-                                        Application to <strong>{{ chat.landlord.username }}</strong>
+                                        Renter
                                     {% endif %}
-                                </p>
-                                <div class="d-flex justify-content-between align-items-center">
+                                </div>
+                                
+                                <div class="card-header-overlay">
+                                    <h5 class="card-title text-white mb-0">{{ chat.property.address }}</h5>
+                                    <div class="small text-light">{{ chat.property.city }}, {{ chat.property.state }}</div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="text-warning fs-4 fw-bold">{{ chat.property.price }}</div>
+                                    <span class="badge bg-light text-dark">{{ chat.property.home_type }}</span>
+                                </div>
+                                
+                                <div class="property-meta">
+                                    <div class="meta-item">
+                                        <i class="bi bi-door-open"></i>
+                                        <span>{{ chat.property.beds|default:"0" }} beds</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="bi bi-droplet"></i>
+                                        <span>{{ chat.property.baths|default:"0" }} baths</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="bi bi-person"></i>
+                                        <span>
+                                            {% if user == chat.landlord %}
+                                                with {{ chat.renter.username }}
+                                            {% else %}
+                                                with {{ chat.landlord.username }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
                                     <small class="text-muted">Started {{ chat.created_at|date:"M d, Y" }}</small>
-                                    <a href="{% url 'negotiation:chat_detail' chat.id %}" class="btn btn-sm btn-outline-warning">
-                                        <i class="bi bi-file-earmark-text"></i> View Application
+                                    <a href="{% url 'negotiation:chat_detail' chat.id %}" class="btn btn-warning">
+                                        <i class="bi bi-chat-left-text"></i> View Application
                                     </a>
                                 </div>
                             </div>
@@ -53,9 +161,9 @@
                 <div class="alert alert-info text-center p-5 shadow-sm">
                     <i class="bi bi-file-earmark-text" style="font-size: 3rem; color: var(--gold);"></i>
                     <h4 class="mt-3">No applications yet</h4>
-                    <p class="mb-4">Start an application with a landlord or renter about a property.</p>
-                    <a href="{% url 'negotiation:new_chat' %}" class="btn btn-warning">
-                        <i class="bi bi-plus-circle"></i> Start New Application
+                    <p class="mb-4">Browse properties and click "Start Application" on a property you're interested in.</p>
+                    <a href="{% url 'negotiation:property_list' %}" class="btn btn-warning">
+                        <i class="bi bi-house-door"></i> Browse Properties
                     </a>
                 </div>
             {% endif %}

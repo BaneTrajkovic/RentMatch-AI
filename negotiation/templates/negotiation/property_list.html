@@ -357,8 +357,8 @@
         </div>
     </div>
     <div class="d-flex align-items-center">
-        <a href="{% url 'negotiation:new_chat' %}" class="btn btn-sm btn-warning">
-            <i class="bi bi-chat-left-fill"></i> New Application
+        <a href="{% url 'negotiation:chat_list' %}" class="btn btn-sm btn-outline-warning">
+            <i class="bi bi-file-earmark-text"></i> View My Applications
         </a>
     </div>
 </div>
@@ -542,9 +542,9 @@
                                 {% endif %}
                                 
                                 <div class="d-grid mt-3">
-                                    <a href="{% url 'negotiation:new_chat' %}?property={{ property.zpid }}" class="btn btn-warning">
+                                    <button type="button" class="btn btn-warning start-application-btn" data-property-id="{{ property.zpid }}" data-property-address="{{ property.address }}">
                                         <i class="bi bi-chat-left-text"></i> Start Application
-                                    </a>
+                                    </button>
                                 </div>
                                 
                                 <div class="property-meta">
@@ -598,37 +598,86 @@
             // Add photo counter indicator
             $(this).append(`<div class="photo-indicator"><span id="${carouselId}-current">1</span>/${totalPhotos}</div>`);
             
-            // Update counter on slide
+            // Update counter when photo changes
             $(this).on('slid.bs.carousel', function() {
-                const activeIndex = $(this).find('.carousel-item.active').index() + 1;
+                const activeIndex = $(this).find('.active').index() + 1;
                 $(`#${carouselId}-current`).text(activeIndex);
             });
         });
         
-        // Add hover effect to show controls
-        $('.property-image-container').hover(
-            function() {
-                $(this).find('.carousel-control-prev, .carousel-control-next').css('opacity', '0.7');
-            },
-            function() {
-                $(this).find('.carousel-control-prev, .carousel-control-next').css('opacity', '0');
+        // Handle direct application process
+        $('.start-application-btn').on('click', function() {
+            // Prevent double clicks
+            if ($(this).prop('disabled')) {
+                return;
             }
-        );
-        
-        // Apply 3D-like shadow effect on card hover
-        $('.card').hover(
-            function() {
-                const card = $(this);
-                card.css('transform', 'translateY(-8px) rotateX(2deg)');
-            },
-            function() {
-                const card = $(this);
-                card.css('transform', 'translateY(0) rotateX(0)');
+            
+            // Add a flag to the button to track in-progress application
+            if ($(this).data('processing')) {
+                return;
             }
-        );
-        
-        // Ensure smooth scrolling
-        $('.property-container').css('scroll-behavior', 'smooth');
+            $(this).data('processing', true);
+            
+            const propertyId = $(this).data('property-id');
+            const propertyAddress = $(this).data('property-address');
+            
+            // Show loading spinner on the button
+            const $btn = $(this);
+            const originalContent = $btn.html();
+            $btn.html('<i class="bi bi-hourglass-split me-2"></i> Processing...').prop('disabled', true);
+            
+            // Default application message
+            const defaultMessage = `Hello, I'm interested in the property at ${propertyAddress}. I'd like to submit an application.`;
+            
+            // Create WebSocket connection
+            const chatSocket = new WebSocket(
+                'ws://' + window.location.host + '/ws/property_chat/new/'
+            );
+            
+            chatSocket.onopen = function(e) {
+                console.log('WebSocket connection established');
+                
+                // Send initial data to create the chat
+                chatSocket.send(JSON.stringify({
+                    'type': 'message',
+                    'message': defaultMessage,
+                    'property_id': propertyId,
+                    'auto_landlord': true // Signal to use default landlord
+                }));
+            };
+            
+            chatSocket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                
+                if (data.type === 'chat_created') {
+                    // Close WebSocket before redirecting
+                    chatSocket.close(1000);
+                    
+                    // Redirect to the newly created chat
+                    window.location.href = `/negotiation/chat/${data.chat.id}/`;
+                } else if (data.type === 'error') {
+                    // Clear processing flag
+                    $btn.data('processing', false);
+                    
+                    // Show error message
+                    alert('Error: ' + data.message);
+                    $btn.html(originalContent).prop('disabled', false);
+                    
+                    // Close the socket
+                    chatSocket.close();
+                }
+            };
+            
+            chatSocket.onclose = function(e) {
+                // Only handle unexpected closes
+                if (e.code !== 1000) {
+                    console.error('WebSocket connection closed unexpectedly');
+                    alert('Connection error. Please try again.');
+                    $btn.html(originalContent).prop('disabled', false);
+                    $btn.data('processing', false);
+                }
+            };
+        });
     });
 </script>
 {% endblock %}

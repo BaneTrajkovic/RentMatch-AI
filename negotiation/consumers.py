@@ -53,13 +53,29 @@ class PropertyChatConsumer(WebsocketConsumer):
             if self.chat_id == 'new':
                 # Create a new chat
                 property_id = text_data_json.get('property_id')
-                landlord_id = text_data_json.get('landlord_id')
-                renter_id = text_data_json.get('renter_id')
                 
-                if not all([property_id, landlord_id, renter_id]):
+                # Handle auto-landlord case (direct application from property page)
+                if text_data_json.get('auto_landlord', False):
+                    try:
+                        # Get the landlord with username "landlordMVP"
+                        landlord = User.objects.get(username="landlordMVP")
+                        landlord_id = landlord.id
+                        renter_id = self.user.id
+                    except User.DoesNotExist:
+                        self.send(text_data=json.dumps({
+                            'type': 'error',
+                            'message': 'Default landlord "landlordMVP" not found'
+                        }))
+                        return
+                else:
+                    # Regular case with specified landlord/renter
+                    landlord_id = text_data_json.get('landlord_id')
+                    renter_id = text_data_json.get('renter_id')
+                
+                if not property_id:
                     self.send(text_data=json.dumps({
                         'type': 'error',
-                        'message': 'Missing required information to create chat'
+                        'message': 'Missing property information'
                     }))
                     return
                 
@@ -76,13 +92,21 @@ class PropertyChatConsumer(WebsocketConsumer):
                     self.channel_name
                 )
                 
-                # Notify client about the new chat
+                # Save the initial message
+                sender_type = 'landlord' if self.is_landlord(self.chat_id) else 'renter'
+                saved_message = self.save_message(self.chat_id, self.user.id, message, sender_type)
+                
+                # Notify client about the new chat with the initial message
                 self.send(text_data=json.dumps({
                     'type': 'chat_created',
-                    'chat': chat
+                    'chat': chat,
+                    'initial_message': saved_message
                 }))
-            
-            # Save the message
+                
+                # Return early - we'll generate AI response when the user opens the chat
+                return
+                
+            # For existing chats, save the message and generate AI response
             sender_type = 'landlord' if self.is_landlord(self.chat_id) else 'renter'
             saved_message = self.save_message(self.chat_id, self.user.id, message, sender_type)
             
@@ -136,7 +160,8 @@ class PropertyChatConsumer(WebsocketConsumer):
             return []
 
     def create_chat(self, property_id, landlord_id, renter_id):
-        property_obj = Property.objects.get(id=property_id)
+        # Get property using zpid which is the primary key
+        property_obj = Property.objects.get(zpid=property_id)
         landlord = User.objects.get(id=landlord_id)
         renter = User.objects.get(id=renter_id)
         
@@ -150,8 +175,9 @@ class PropertyChatConsumer(WebsocketConsumer):
             'id': chat.id,
             'title': chat.title,
             'property': {
-                'id': property_obj.id,
-                'title': property_obj.title
+                'id': property_obj.zpid,
+                'address': property_obj.address,
+                'image_url': property_obj.main_image_url
             },
             'landlord': {
                 'id': landlord.id,
