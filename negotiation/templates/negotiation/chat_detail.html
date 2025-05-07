@@ -2,6 +2,104 @@
 
 {% block title %}{{ chat.title }} - RentMatch.AI{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Additional styles for markdown content */
+    .bot-message {
+        font-size: 14px;
+    }
+    
+    .bot-message h1, 
+    .bot-message h2, 
+    .bot-message h3, 
+    .bot-message h4, 
+    .bot-message h5, 
+    .bot-message h6 {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .bot-message h1 { font-size: 1.5rem; }
+    .bot-message h2 { font-size: 1.4rem; }
+    .bot-message h3 { font-size: 1.3rem; }
+    .bot-message h4 { font-size: 1.2rem; }
+    .bot-message h5 { font-size: 1.1rem; }
+    .bot-message h6 { font-size: 1rem; }
+    
+    .bot-message p {
+        margin-bottom: 0.75rem;
+    }
+    
+    .bot-message ul, 
+    .bot-message ol {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+        padding-left: 1.5rem;
+    }
+    
+    .bot-message li {
+        margin-bottom: 0.25rem;
+    }
+    
+    .bot-message code {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+    
+    .bot-message pre {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 0.75rem;
+        border-radius: 5px;
+        overflow-x: auto;
+        margin-bottom: 0.75rem;
+    }
+    
+    .bot-message pre code {
+        background-color: transparent;
+        padding: 0;
+        border-radius: 0;
+    }
+    
+    .bot-message blockquote {
+        border-left: 4px solid #ddd;
+        padding-left: 1rem;
+        margin-left: 0;
+        color: #666;
+        font-style: italic;
+    }
+    
+    .bot-message table {
+        border-collapse: collapse;
+        margin-bottom: 0.75rem;
+        width: 100%;
+    }
+    
+    .bot-message table th,
+    .bot-message table td {
+        border: 1px solid #ddd;
+        padding: 0.4rem 0.6rem;
+        text-align: left;
+    }
+    
+    .bot-message table th {
+        background-color: #f5f5f5;
+    }
+    
+    .bot-message a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .bot-message a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="content-header">
     <div class="d-flex align-items-center">
@@ -22,6 +120,9 @@
         <a href="{% url 'negotiation:chat_list' %}" class="btn btn-sm btn-outline-secondary me-2">
             <i class="bi bi-arrow-left"></i> Back to Applications
         </a>
+        <button type="button" class="btn btn-sm btn-outline-info ms-2" data-bs-toggle="modal" data-bs-target="#aiHelpModal">
+            <i class="bi bi-robot"></i> AI Assistant Help
+        </button>
     </div>
 </div>
 
@@ -36,7 +137,11 @@
                     {% else %}
                         {% if is_landlord %}renter-message{% else %}user-message{% endif %}
                     {% endif %}">
-                    {{ message.content }}
+                    {% if message.sender_type == 'bot' %}
+                        <div class="markdown-content">{{ message.content }}</div>
+                    {% else %}
+                        {{ message.content }}
+                    {% endif %}
                     <div class="message-time">
                         {% if message.sender_type == 'bot' %}
                             AI Assistant
@@ -48,7 +153,7 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p class="welcome-message">This is the beginning of your application for {{ chat.property.title }}. The AI Assistant will help facilitate your application process.</p>
+            <p class="welcome-message">This is the beginning of your application for {{ chat.property.title }}. Use our AI Lease Negotiation Assistant by starting your message with "AI:" to get help with structuring your deal, drafting terms, or finalizing your digital lease. You can continue chatting normally without using "AI:" and the assistant will remain silent.</p>
         {% endif %}
     </div>
 
@@ -59,18 +164,94 @@
     </div>
 
     <div class="chat-input-container">
-        <input type="text" class="chat-input" id="chat-input" placeholder="Type your message here..." />
+        <input type="text" class="chat-input" id="chat-input" placeholder="Type 'AI:' at the start of your message to ask for lease negotiation assistance..." />
         <button class="send-button" id="send-button">
             <i class="bi bi-send-fill"></i>
         </button>
     </div>
 </div>
+
+<!-- AI Help Modal -->
+<div class="modal fade" id="aiHelpModal" tabindex="-1" aria-labelledby="aiHelpModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="aiHelpModalLabel">AI Lease Negotiation Assistant</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-4">
+          <h6 class="fw-bold text-primary">How to Use the AI Lease Assistant:</h6>
+          <p>To get help from our AI assistant, simply start your message with <code>AI:</code> followed by your request.</p>
+          
+          <div class="alert alert-info">
+            <strong>Example:</strong> <code>AI: Can you help us draft lease terms for a 12-month agreement?</code>
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <h6 class="fw-bold text-primary">What the AI Lease Assistant Can Help With:</h6>
+          <ul class="list-group mb-3">
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Structuring rental negotiations between landlords and tenants</li>
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Providing guidance on lease terms, market standards, and rights</li>
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Drafting clear, equitable terms based on both parties' needs</li>
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Help finalizing digital lease agreements</li>
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Suggesting compromise solutions when there are disagreements</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h6 class="fw-bold text-primary">Topics the AI Can Assist With:</h6>
+          <div class="row">
+            <div class="col-md-6">
+              <ul class="list-unstyled">
+                <li><i class="bi bi-arrow-right-circle me-2"></i>Rent amount and payment schedule</li>
+                <li><i class="bi bi-arrow-right-circle me-2"></i>Security deposit terms</li>
+                <li><i class="bi bi-arrow-right-circle me-2"></i>Lease duration and renewal options</li>
+                <li><i class="bi bi-arrow-right-circle me-2"></i>Maintenance responsibilities</li>
+                <li><i class="bi bi-arrow-right-circle me-2"></i>Pet policies</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <ul class="list-unstyled">
+                <li><i class="bi bi-arrow-right-circle me-2"></i>Subletting rules</li>
+                <li><i class="bi bi-arrow-right-circle me-2"></i>Move-in/move-out conditions</li>
+                <li><i class="bi bi-arrow-right-circle me-2"></i>Utilities and additional fees</li>
+                <li><i class="bi bi-arrow-right-circle me-2"></i>Early termination options</li>
+                <li><i class="bi bi-arrow-right-circle me-2"></i>Property condition assessments</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
+<!-- Include marked.js for Markdown parsing -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
     $(document).ready(function () {
         let botIsReplying = false;
+        
+        // Initialize marked.js options
+        marked.setOptions({
+            breaks: true,      // Convert line breaks to <br>
+            gfm: true,         // Enable GitHub flavored markdown
+            headerIds: false,  // Don't add ids to headers
+            sanitize: false    // Allow HTML in markdown
+        });
+        
+        // Parse existing markdown content on page load
+        $('.markdown-content').each(function() {
+            const rawContent = $(this).text();
+            $(this).html(marked.parse(rawContent));
+        });
         
         // Set up WebSocket connection
         const chatId = {{ chat.id }};
@@ -84,6 +265,57 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
+        // Function to check if message starts with AI:
+        function isAIRequest(message) {
+            return /^\s*AI\s*:/i.test(message);
+        }
+        
+        // Function to add message to chat UI
+        function addMessageToChat(message, senderType, sender, timestamp) {
+            const messageDiv = $('<div></div>');
+            
+            // Determine message class
+            if (senderType === 'bot') {
+                messageDiv.addClass('message bot-message');
+            } else if (senderType === 'landlord') {
+                {% if is_landlord %}
+                    messageDiv.addClass('message user-message');
+                {% else %}
+                    messageDiv.addClass('message landlord-message');
+                {% endif %}
+            } else {
+                {% if is_landlord %}
+                    messageDiv.addClass('message renter-message');
+                {% else %}
+                    messageDiv.addClass('message user-message');
+                {% endif %}
+            }
+            
+            // For bot messages, render as markdown
+            if (senderType === 'bot') {
+                const markdownDiv = $('<div class="markdown-content"></div>');
+                markdownDiv.html(marked.parse(message));
+                messageDiv.append(markdownDiv);
+            } else {
+                messageDiv.text(message);
+            }
+            
+            // Add timestamp info
+            const timeDiv = $('<div class="message-time"></div>');
+            if (senderType === 'bot') {
+                timeDiv.text('AI Assistant - ' + new Date(timestamp).toLocaleString());
+            } else {
+                timeDiv.text(sender + ' - ' + new Date(timestamp).toLocaleString());
+            }
+            messageDiv.append(timeDiv);
+            
+            // Add message to chat
+            $('#chat-messages').append(messageDiv);
+            
+            // Scroll to bottom
+            scrollToBottom();
+        }
+
         // WebSocket handlers
         chatSocket.onopen = function(e) {
             console.log('WebSocket connection established');
@@ -94,46 +326,31 @@
             const data = JSON.parse(e.data);
             
             if (data.type === 'chat_message') {
-                // Handle regular chat messages
+                // Handle incoming message
                 const message = data.message;
-                const messageDiv = $('<div></div>');
                 
-                // Determine message class
-                if (message.sender_type === 'bot') {
-                    messageDiv.addClass('message bot-message');
-                } else if (message.sender_type === 'landlord') {
+                // Only add to UI if it's not from current user (since we already added it)
+                // or if it's a bot message
+                const isCurrentUserMessage = (
                     {% if is_landlord %}
-                        messageDiv.addClass('message user-message');
+                        message.sender_type === 'landlord'
                     {% else %}
-                        messageDiv.addClass('message landlord-message');
+                        message.sender_type === 'renter'
                     {% endif %}
-                } else {
-                    {% if is_landlord %}
-                        messageDiv.addClass('message renter-message');
-                    {% else %}
-                        messageDiv.addClass('message user-message');
-                    {% endif %}
-                }
+                ) && message.sender === '{{ user.username }}';
                 
-                messageDiv.text(message.content);
-                
-                // Add timestamp info
-                const timeDiv = $('<div class="message-time"></div>');
-                if (message.sender_type === 'bot') {
-                    timeDiv.text('AI Assistant - ' + new Date(message.timestamp).toLocaleString());
-                } else {
-                    timeDiv.text(message.sender + ' - ' + new Date(message.timestamp).toLocaleString());
+                // Only display messages from other users or the bot (not our own, which we display immediately)
+                if (!isCurrentUserMessage || message.sender_type === 'bot') {
+                    addMessageToChat(
+                        message.content, 
+                        message.sender_type, 
+                        message.sender, 
+                        message.timestamp
+                    );
                 }
-                messageDiv.append(timeDiv);
                 
                 // Hide typing indicator
                 $('#typing-indicator').hide();
-                
-                // Add message to chat
-                $('#chat-messages').append(messageDiv);
-                
-                // Scroll to bottom
-                scrollToBottom();
                 
                 // Reset states if this is a bot message (indicating the response cycle is complete)
                 if (message.sender_type === 'bot') {
@@ -175,15 +392,23 @@
             const message = $('#chat-input').val().trim();
             if (message === '') return;
             
-            // Update UI state
-            botIsReplying = true;
-            $('#send-button i').removeClass('bi-send-fill').addClass('bi-hourglass-split');
-            $('#chat-input').prop('disabled', true);
+            // Immediately display the user's message
+            const senderType = {% if is_landlord %}'landlord'{% else %}'renter'{% endif %};
+            const sender = '{{ user.username }}';
+            const now = new Date();
             
-            // Show typing indicator
-            $('#typing-indicator').show();
+            // Add message to UI immediately
+            addMessageToChat(message, senderType, sender, now);
             
-            // Send message via WebSocket - don't add to UI here
+            // Only block input and show typing indicator if message starts with AI:
+            if (isAIRequest(message)) {
+                botIsReplying = true;
+                $('#send-button i').removeClass('bi-send-fill').addClass('bi-hourglass-split');
+                $('#chat-input').prop('disabled', true);
+                $('#typing-indicator').show();
+            }
+            
+            // Send message via WebSocket
             chatSocket.send(JSON.stringify({
                 'type': 'message',
                 'message': message

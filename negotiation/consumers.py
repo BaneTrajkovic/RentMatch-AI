@@ -4,6 +4,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.contrib.auth.models import User
 from .models import Property, PropertyChat, PropertyChatMessage
+from .helpers import generate_negotiation_response, should_ai_respond
 
 class PropertyChatConsumer(WebsocketConsumer):
     def connect(self):
@@ -103,10 +104,13 @@ class PropertyChatConsumer(WebsocketConsumer):
                     'initial_message': saved_message
                 }))
                 
-                # Return early - we'll generate AI response when the user opens the chat
+                # Send an AI welcome response if the message begins with "AI:"
+                if should_ai_respond(message):
+                    self.send_ai_response(message)
+                
                 return
                 
-            # For existing chats, save the message and generate AI response
+            # For existing chats, save the message
             sender_type = 'landlord' if self.is_landlord(self.chat_id) else 'renter'
             saved_message = self.save_message(self.chat_id, self.user.id, message, sender_type)
             
@@ -119,18 +123,10 @@ class PropertyChatConsumer(WebsocketConsumer):
                 }
             )
             
-            # Generate AI response
-            ai_response = self.generate_ai_response(self.chat_id, message)
-            
-            # Save and send AI response
-            ai_message = self.save_message(self.chat_id, None, ai_response, 'bot')
-            async_to_sync(self.channel_layer.group_send)(
-                self.chat_group_name,
-                {
-                    'type': 'chat_message',
-                    'message': ai_message
-                }
-            )
+            # Process AI response asynchronously without blocking further user messages
+            # unless the message is explicitly directed at the AI
+            if should_ai_respond(message):
+                self.send_ai_response(message)
 
     def chat_message(self, event):
         message = event['message']
@@ -212,15 +208,53 @@ class PropertyChatConsumer(WebsocketConsumer):
     def is_landlord(self, chat_id):
         chat = PropertyChat.objects.get(id=chat_id)
         return self.user.id == chat.landlord.id
-
-    def generate_ai_response(self, chat_id, user_message):
-        # Here you would integrate with the Gemini API
-        # For now, we'll return a placeholder response
+    
+    def send_ai_response(self, user_message):
+        """
+        Generates and sends an AI response based on the user's message.
         
-        # In the future, implement:
-        # 1. Retrieve chat history for context
-        # 2. Call Gemini API with appropriate instructions
-        # 3. Process and return the AI response
-        
-        # Placeholder response
-        return f"This is where the Gemini API would process: '{user_message}' and provide negotiation assistance. We'll implement this integration in the next step."
+        Args:
+            user_message: The message that triggered the AI response
+        """
+        try:
+            # Get the chat
+            chat = PropertyChat.objects.get(id=self.chat_id)
+            
+            # Generate AI response
+            ai_response = generate_negotiation_response(chat, user_message)
+            
+            # If there's no response (e.g., message doesn't start with AI:), return
+            if not ai_response:
+                return
+            
+            # Save the AI response
+            ai_message = self.save_message(self.chat_id, None, ai_response, 'bot')
+            
+            # Send the AI response to the chat group
+            async_to_sync(self.channel_layer.group_send)(
+                self.chat_group_name,
+                {
+                    'type': 'chat_message',
+                    'message': ai_message
+                }
+            )
+            
+        except PropertyChat.DoesNotExist:
+            # Handle case where chat doesn't exist
+            self.send(text_data=json.dumps({
+                'type': 'error',
+                'message': 'Chat not found'
+            }))
+            
+        except Exception as e:
+            # Handle any other errors
+            error_response = f"An error occurred with the AI assistant: {str(e)}"
+            error_message = self.save_message(self.chat_id, None, error_response, 'bot')
+            
+            async_to_sync(self.channel_layer.group_send)(
+                self.chat_group_name,
+                {
+                    'type': 'chat_message',
+                    'message': error_message
+                }
+            )
