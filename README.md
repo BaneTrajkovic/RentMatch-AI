@@ -50,18 +50,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
-
-Create a `.env` file in the project root with the following variables:
-
-```
-SECRET_KEY=your_django_secret_key
-DEBUG=True
-GEMINI_API_KEY=your_gemini_api_key
-REDIS_URL=your_redis_url
-```
-
-### 4.1 Obtaining a Gemini API Key
+### 4. Obtaining a Gemini API Key
 
 **Option 1: Get your own Gemini API key**
 1. Visit [Google AI Studio](https://ai.google.dev/gemini-api/docs/api-key) to create your API key
