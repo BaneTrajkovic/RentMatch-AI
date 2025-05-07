@@ -19,15 +19,13 @@ RentMatch.AI is an innovative rental property platform that leverages AI to stre
    - [Landlord Experience](#landlord-experience)
 6. [Technical Architecture](#technical-architecture)
 7. [API Integrations](#api-integrations)
-8. [Admin Commands](#admin-commands)
-9. [Troubleshooting](#troubleshooting)
+8. [Troubleshooting](#troubleshooting)
 
 ## System Requirements
 
 - Python 3.13.3
 - Django 5.2
 - SQLite3 (already included)
-- Redis (for WebSocket support)
 - Google Gemini Pro API Key
 
 ## Installation & Setup
@@ -190,40 +188,7 @@ RentMatch.AI is built on a modern tech stack:
 - **Google Gemini API**: Powers both the general chatbot and the lease negotiation assistant
 - **Property Data API**: Sample property data based on NYC listings
 
-## Admin Commands
-
-### Manage Property Applications
-
-Delete all property applications and messages (useful for testing):
-
-```bash
-python manage.py delete_all_applications
-```
-
-Use the `--dry-run` flag to preview what would be deleted:
-
-```bash
-python manage.py delete_all_applications --dry-run
-```
-
-### Load Sample Data
-
-If you've reset the database and need to reload sample data:
-
-```bash
-python manage.py load_sample_properties
-python manage.py create_test_users
-```
-
 ## Troubleshooting
-
-### WebSocket Connection Issues
-
-If you experience connection issues with the chat functionality:
-
-1. Ensure Redis is running
-2. Verify Django Channels configuration in `settings.py`
-3. Check browser console for WebSocket errors
 
 ### AI Assistant Not Responding
 
@@ -244,7 +209,6 @@ cp db.sqlite3 db.sqlite3.backup
 cp db.sqlite3.backup db.sqlite3
 
 # OR 2. Reset and recreate
-python manage.py flush  # Clear all data
 python manage.py create_test_users  # Recreate test users
 python manage.py load_sample_properties  # Load sample properties
 ```
