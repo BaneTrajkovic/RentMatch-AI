@@ -1,60 +1,269 @@
-# RentMatch AI Project
+# RentMatch.AI - MVP Documentation
 
-A Django-based social network application with AI-powered chatbot and negotiation features.
+## Overview
 
-## Quick Start
+RentMatch.AI is an innovative rental property platform that leverages AI to streamline the rental process for both landlords and renters. This MVP (Minimum Viable Product) showcases the core functionalities including property listings, AI-powered chats, application management, and AI-assisted lease negotiations.
 
-1. Clone the repository:
+## Table of Contents
+
+1. [System Requirements](#system-requirements)
+2. [Installation & Setup](#installation--setup)
+3. [User Credentials](#user-credentials)
+4. [Core Features](#core-features)
+   - [Property Search](#property-search)
+   - [AI Chatbot Assistant](#ai-chatbot-assistant)
+   - [Property Applications](#property-applications)
+   - [AI Lease Negotiation](#ai-lease-negotiation)
+5. [User Flows](#user-flows)
+   - [Renter Experience](#renter-experience)
+   - [Landlord Experience](#landlord-experience)
+6. [Technical Architecture](#technical-architecture)
+7. [API Integrations](#api-integrations)
+8. [Admin Commands](#admin-commands)
+9. [Troubleshooting](#troubleshooting)
+
+## System Requirements
+
+- Python 3.8+
+- Django 5.0+
+- PostgreSQL (recommended) or SQLite
+- Redis (for WebSocket support)
+- Node.js and npm (for front-end assets)
+- Google Gemini Pro API Key
+
+## Installation & Setup
+
+### 1. Clone the Repository
+
 ```bash
-git clone https://github.com/your-username/RentMatch-AI-Project.git
+git clone <repository-url>
 cd RentMatch-AI-Project
 ```
 
-2. Set up a virtual environment (optional but recommended):
+### 2. Create and Activate Virtual Environment
+
 ```bash
 python -m venv venv
-# On Windows
-venv\Scripts\activate
-# On macOS/Linux
-source venv/bin/activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. Install dependencies:
+### 3. Install Dependencies
+
 ```bash
 pip install -r requirements.txt
+npm install  # If using Node.js for front-end assets
 ```
 
-4. Set up your API keys:
+### 4. Configure Environment Variables
+
+Create a `.env` file in the project root with the following variables:
+
+```
+SECRET_KEY=your_django_secret_key
+DEBUG=True
+DATABASE_URL=your_database_url
+GEMINI_API_KEY=your_gemini_api_key
+REDIS_URL=your_redis_url
+```
+
+### 5. Database Setup
+
 ```bash
-# Copy the example file and replace with your actual API key
-cp constants.py.example constants.py
-# Then edit constants.py with your Gemini API key
+python manage.py migrate
 ```
 
-5. Run the development server:
+### 6. Create Test Data
+
+```bash
+python manage.py load_sample_properties
+python manage.py create_test_users
+```
+
+### 7. Run the Development Server
+
 ```bash
 python manage.py runserver
 ```
 
-6. Visit `http://127.0.0.1:8000/` in your browser.
+## User Credentials
 
-## Features
+### Renter Access
+- **Username**: Same as password (e.g., `testing1`/`testing1`)
+- Multiple test renter accounts are available (testing1, testing2, etc.)
 
-- User authentication and profiles
-- AI chatbot for property inquiries
-- Negotiation system
-- Django Channels for real-time communication
+### Landlord Access
+- **Username**: `landlordMVP`
+- **Password**: `landlordMVP`
 
-## Database
+### Admin Access
+- Access the Django admin at `/admin`
+- **Username**: `admin`
+- **Password**: `admin`
 
-This repository includes the SQLite database with pre-loaded data for immediate use. No database migrations or setup required. 
+## Core Features
 
-## Login Information
+### Property Search
 
-For testing purposes, you can log in using:
-- Username: renterMVP
-- Password: rentmatchMVP1
+The platform offers advanced property search capabilities:
 
-## Critical Assumptions
+- **Location-based search**: Find properties in specific neighborhoods or by address keywords
+- **Filter by criteria**: Price range, number of bedrooms/bathrooms, amenities
+- **Detailed property pages**: View images, features, floor plans, and neighborhood information
+- **Save favorites**: Renters can save properties to revisit later
 
-1. Users prefer AI-powered search over traditional browsing 
+### AI Chatbot Assistant
+
+Our general-purpose AI chatbot helps renters navigate the platform:
+
+- **Natural conversation**: Engage in freeform discussions about rental needs and preferences
+- **Property recommendations**: Ask the AI to suggest properties based on your requirements
+- **Market information**: Get insights about NYC neighborhoods, rent ranges, and market trends
+- **Personalized assistance**: The AI remembers your preferences throughout the conversation
+- **Activate**: Access through the chat icon in the navigation bar
+
+#### Chatbot Commands
+
+The chatbot responds to natural language queries such as:
+- "Find me a 2-bedroom apartment in Brooklyn under $3000"
+- "What's the average rent in Manhattan?"
+- "Tell me about the East Village neighborhood"
+
+### Property Applications
+
+The application system streamlines the rental application process:
+
+- **One-click apply**: Renters can apply to properties with a single click
+- **Application tracking**: View status of all submitted applications
+- **Direct communication**: Message landlords about specific properties
+- **Document management**: Upload and share required documentation
+
+### AI Lease Negotiation
+
+The AI-powered lease negotiation system is the core innovative feature:
+
+- **Structured negotiations**: AI facilitates discussions between renters and landlords
+- **Legal guidance**: Get information on lease terms, rights, and market standards
+- **Term drafting**: AI can help draft clear, equitable lease terms
+- **Digital signing**: Finalize leases digitally right in the platform
+- **Contextual awareness**: AI tracks the entire conversation history to provide relevant responses
+
+#### How to Use the AI Lease Assistant
+
+1. In a property chat between landlord and renter, type `AI:` followed by your request
+2. The AI will only respond when specifically prompted with the `AI:` prefix
+3. Example: `AI: Can you help us draft a 12-month lease agreement?`
+4. For lease finalization, both parties must type "Yes" followed by their full legal name
+
+## User Flows
+
+### Renter Experience
+
+1. **Sign up/login**: Create an account or log in with test credentials
+2. **Complete profile**: Add personal information, income verification, rental history
+3. **Search properties**: Use filters or AI chat to find suitable properties
+4. **Apply to properties**: Submit applications to properties of interest
+5. **Negotiate lease**: Once approved by a landlord, use the AI-assisted negotiation
+6. **Sign lease**: Finalize the agreement using the digital signature process
+
+### Landlord Experience
+
+1. **Login**: Use landlord credentials (landlordMVP/landlordMVP)
+2. **Manage listings**: View, add, or edit property listings
+3. **Review applications**: See all applications submitted by interested renters
+4. **Communicate with applicants**: Message renters directly about their applications
+5. **Negotiate terms**: Use the AI-assisted platform to finalize lease details
+6. **Finalize leases**: Complete the process with digital signatures
+
+## Technical Architecture
+
+RentMatch.AI is built on a modern tech stack:
+
+- **Backend**: Django (Python) with Django Channels for WebSockets
+- **Database**: PostgreSQL (or SQLite for development)
+- **Real-time communication**: Redis + Django Channels
+- **AI integration**: Google Gemini Pro API
+- **Frontend**: Django templates with Bootstrap 5, JavaScript, and AJAX
+
+### Key Components
+
+- **Users app**: Authentication, user profiles, and permissions
+- **Negotiation app**: Property listings, applications, and lease negotiation
+- **Chatbot app**: General-purpose AI assistance
+
+## API Integrations
+
+- **Google Gemini API**: Powers both the general chatbot and the lease negotiation assistant
+- **Property Data API**: Sample property data based on NYC listings
+
+## Admin Commands
+
+### Manage Property Applications
+
+Delete all property applications and messages (useful for testing):
+
+```bash
+python manage.py delete_all_applications
+```
+
+Use the `--dry-run` flag to preview what would be deleted:
+
+```bash
+python manage.py delete_all_applications --dry-run
+```
+
+### Load Sample Data
+
+```bash
+python manage.py load_sample_properties
+```
+
+## Troubleshooting
+
+### WebSocket Connection Issues
+
+If you experience connection issues with the chat functionality:
+
+1. Ensure Redis is running
+2. Verify Django Channels configuration in `settings.py`
+3. Check browser console for WebSocket errors
+
+### AI Assistant Not Responding
+
+1. Verify your Gemini API key is correctly set
+2. For negotiation assistant, ensure messages start with `AI:` 
+3. Check server logs for any API rate limiting or errors
+
+### Database Reset
+
+If you need to reset the database:
+
+```bash
+python manage.py flush  # Clear all data
+python manage.py migrate  # Recreate the schema
+python manage.py create_test_users  # Recreate test users
+python manage.py load_sample_properties  # Load sample properties
+```
+
+---
+
+## MVP Limitations and Future Enhancements
+
+This MVP demonstrates the core functionality but has some limitations:
+
+- Limited property inventory (sample data only)
+- Basic profile management features
+- Simplified lease document generation
+- No payment processing integration
+
+Future versions will include:
+- Advanced document generation with legal templates
+- Background check integration
+- Payment processing for application fees and rent
+- Mobile applications
+- Expanded AI capabilities for property management
+
+---
+
+For technical support or questions, contact the development team.
+
+© 2025 RentMatch.AI - All rights reserved 
