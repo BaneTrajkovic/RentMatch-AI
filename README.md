@@ -63,6 +63,16 @@ GEMINI_API_KEY=your_gemini_api_key
 REDIS_URL=your_redis_url
 ```
 
+### 4.1 Obtaining a Gemini API Key
+
+**Option 1: Get your own Gemini API key**
+1. Visit [Google AI Studio](https://ai.google.dev/gemini-api/docs/api-key) to create your API key
+2. Copy your API key to the `constants.py.example` file
+3. Rename the file to `constants.py`
+
+**Option 2: Request an API key**
+Email bt2639@columbia.edu to request a Gemini API key for this project.
+
 ### 5. Database Setup
 
 The project includes a pre-configured SQLite3 database with sample data already loaded. No database migration or setup is required.
