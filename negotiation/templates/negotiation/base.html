@@ -467,25 +467,9 @@
                     {% endfor %}
                 </div>
             </div>
-            <a href="#" class="menu-item">
-                <i class="bi bi-search"></i>
-                <span class="menu-text">Search</span>
-            </a>
-            <a href="#" class="menu-item">
-                <i class="bi bi-star"></i>
-                <span class="menu-text">Favorites</span>
-            </a>
-            <a href="#" class="menu-item">
-                <i class="bi bi-calendar-event"></i>
-                <span class="menu-text">Schedule</span>
-            </a>
-            <a href="#" class="menu-item">
+            <a href="{% url 'users:profile' %}" class="menu-item {% if 'profile' in request.path %}active{% endif %}">
                 <i class="bi bi-person"></i>
-                <span class="menu-text">Profile</span>
-            </a>
-            <a href="#" class="menu-item">
-                <i class="bi bi-gear"></i>
-                <span class="menu-text">Settings</span>
+                <span class="menu-text">My Profile</span>
             </a>
         </div>
     </div>

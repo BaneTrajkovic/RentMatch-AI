@@ -177,16 +177,13 @@
   <div class="sidebar">
     <div class="sidebar-header">
       <i class="bi bi-house-heart-fill sidebar-icon"></i>
-      <a class="sidebar-logo-text" href="#">RentMatch.AI</a>
+      <a class="sidebar-logo-text" href="{% url 'users:welcome' %}">RentMatch.AI</a>
     </div>
     <div class="sidebar-menu mt-4">
-      <a href="#" class="menu-item active"><i class="bi bi-house-door"></i><span class="menu-text">Properties</span></a>
-      <a href="#" class="menu-item"><i class="bi bi-chat-dots-fill"></i><span class="menu-text">Chat</span></a>
-      <a href="#" class="menu-item"><i class="bi bi-search"></i><span class="menu-text">Search</span></a>
-      <a href="#" class="menu-item"><i class="bi bi-star"></i><span class="menu-text">Favorites</span></a>
-      <a href="#" class="menu-item"><i class="bi bi-calendar-event"></i><span class="menu-text">Schedule</span></a>
-      <a href="#" class="menu-item"><i class="bi bi-file-earmark-text"></i><span class="menu-text">Applications</span></a>
-      <a href="#" class="menu-item"><i class="bi bi-gear"></i><span class="menu-text">Settings</span></a>
+      <a href="{% url 'negotiation:property_list' %}" class="menu-item active"><i class="bi bi-house-door"></i><span class="menu-text">Properties</span></a>
+      <a href="{% url 'chatbot:new-conversation' %}" class="menu-item"><i class="bi bi-chat-dots-fill"></i><span class="menu-text">AI Assistant</span></a>
+      <a href="{% url 'negotiation:chat_list' %}" class="menu-item"><i class="bi bi-file-earmark-text"></i><span class="menu-text">Applications</span></a>
+      <a href="{% url 'users:profile' %}" class="menu-item"><i class="bi bi-person"></i><span class="menu-text">My Profile</span></a>
     </div>
   </div>
 
