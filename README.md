@@ -4,6 +4,10 @@
 
 RentMatch.AI is an innovative rental property platform that leverages AI to streamline the rental process for both landlords and renters. This MVP (Minimum Viable Product) showcases the core functionalities including property listings, AI-powered chats, application management, and AI-assisted lease negotiations.
 
+## Video
+
+The MVP walkthrough can be seen in the video: [RentMatch.AI Demo](https://youtu.be/zFtlvr0o1XQ)
+
 ## Table of Contents
 
 1. [System Requirements](#system-requirements)
