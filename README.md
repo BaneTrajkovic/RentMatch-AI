@@ -246,24 +246,6 @@ python manage.py load_sample_properties  # Load sample properties
 
 ---
 
-## MVP Limitations and Future Enhancements
-
-This MVP demonstrates the core functionality but has some limitations:
-
-- Limited property inventory (sample data only)
-- Basic profile management features
-- Simplified lease document generation
-- No payment processing integration
-
-Future versions will include:
-- Advanced document generation with legal templates
-- Background check integration
-- Payment processing for application fees and rent
-- Mobile applications
-- Expanded AI capabilities for property management
-
----
-
 For technical support or questions, contact the development team.
 
 © 2025 RentMatch.AI - All rights reserved 
